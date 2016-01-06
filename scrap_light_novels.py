@@ -5,7 +5,6 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 from readability.readability import Document
-from ebooklib import epub
 from bs4 import BeautifulSoup
 
 header = {'User-agent' : 'Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5'}
@@ -57,4 +56,4 @@ def chapters_walk(start_chapter_number, end_chapter_number, url):
     return chapters_walk(start_chapter_number + 1, end_chapter_number, find_from_toc(start_chapter_number + 1, toc))
 
 if __name__ == '__main__':
-    chapters_walk(21, 52, 'http://raisingthedead.ninja/2015/10/01/smartphone-chapter-21/')
+    
