@@ -18,8 +18,12 @@ def visit_url(url):
 
 def strip_chapter(html):
     doc = Document(html)
-    if len(doc.summary()) == 20:
-        print 'This page has errors.'
+    if len(doc.summary()) <= 20:
+        print 'This page has errors, returning entry-content div raw HTML.'
+        content = str(BeautifulSoup(html, 'html.parser').find_all('div', class_='entry-content')[0])
+        content = '<html><head><meta charset="utf-8"></head>' + content + '</html>'
+        return doc.short_title(), content
+
     return (doc.short_title(),
            str(doc.summary()).replace('<html>', '<html><head><meta charset="utf-8"></head>'))
 
