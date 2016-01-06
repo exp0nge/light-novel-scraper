@@ -18,8 +18,10 @@ def visit_url(url):
 
 def strip_chapter(html):
     doc = Document(html)
+    if len(doc.summary()) == 20:
+        print 'This page has errors.'
     return (doc.short_title(),
-           str(doc.summary()).replace('<html>', '<html><head><meta charset="utf-8"></ha'))
+           str(doc.summary()).replace('<html>', '<html><head><meta charset="utf-8"></head>'))
 
 def find_from_toc(chapter_number, url):
     chapter_number = str(chapter_number)
@@ -30,6 +32,8 @@ def find_from_toc(chapter_number, url):
             return link.get('href')
 
 def chapters_walk(start_chapter_number, end_chapter_number, url):
+    start_chapter_number = int(start_chapter_number)
+    end_chapter_number = int(end_chapter_number)
     if start_chapter_number > end_chapter_number:
         print  'finished'
         return
@@ -51,7 +55,8 @@ def chapters_walk(start_chapter_number, end_chapter_number, url):
             return chapters_walk(start_chapter_number + 1, end_chapter_number, link.get('href'))
         if 'table of contents' in link.text.lower():
             toc = link.get('href')
+
     return chapters_walk(start_chapter_number + 1, end_chapter_number, find_from_toc(start_chapter_number + 1, toc))
 
 if __name__ == '__main__':
-    pass
+    chapters_walk(sys.argv[1], sys.argv[2], sys.argv[3])
