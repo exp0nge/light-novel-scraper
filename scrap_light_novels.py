@@ -38,29 +38,6 @@ def chapters_walk(start_chapter_number, end_chapter_number, url):
         return
 
     print 'Fetching chapter ' + str(start_chapter_number)
-    # book = epub.EpubBook()
-    # book.set_title(title)
-    # book.add_author(start_url)
-    # chapter_contents = strip_chapter(visit_url(start_url))
-    # chapter = epub.EpubHtml(title=chapter_contents[0],
-    #                         content=chapter_contents[1],
-    #                         file_name='chap_01.xhtml')
-    # book.add_item(chapter)
-    #
-    # book.add_item(epub.EpubNcx())
-    # book.add_item(epub.EpubNav())
-    # # define CSS style
-    # style = 'BODY {color: white;}'
-    # nav_css = epub.EpubItem(uid="style_nav", file_name="style/nav.css", media_type="text/css", content=style)
-    #
-    # # add CSS file
-    # book.add_item(nav_css)
-    # book.spine = ['nav', chapter]
-    # with open('test.html', 'w+') as f:
-    #     f.write(chapter_contents[1])
-    # epub.write_epub('test.epub', book, {})
-
-    # Start on initial url
 
     html = visit_url(url)
     chapter = strip_chapter(html)
