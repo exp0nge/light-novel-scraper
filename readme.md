@@ -16,5 +16,5 @@ The following will grab all the chapters from 21 to 52:
 
 Have the following installed with `pip`:
 
-1. `beautifulsoup4`
-1. `readability-lxml`
+1. [beautifulsoup4](http://www.crummy.com/software/BeautifulSoup/)
+1. [readability-lxml](https://github.com/buriy/python-readability)

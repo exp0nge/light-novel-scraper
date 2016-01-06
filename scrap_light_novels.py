@@ -29,8 +29,6 @@ def find_from_toc(chapter_number, url):
         if chapter in link.text.lower():
             return link.get('href')
 
-
-
 def chapters_walk(start_chapter_number, end_chapter_number, url):
     if start_chapter_number > end_chapter_number:
         print  'finished'
