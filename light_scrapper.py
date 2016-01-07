@@ -5,9 +5,17 @@ import os
 
 from readability.readability import Document
 from bs4 import BeautifulSoup
+from ebooklib import epub
 
 reload(sys)
 sys.setdefaultencoding('utf-8')  # Needed fore websites that use Unicode
+
+
+class TableOfContentsError(Exception):
+    """
+    Useful to raise if TOC not found
+    """
+    pass
 
 
 class Scrapper(object):
@@ -31,7 +39,7 @@ class Scrapper(object):
         self.end_chapter_number = int(end_chapter_number)
         self.start_url = self.url = url
         self.main_content_div = 'entry-content'
-        self.toc = []
+        self.toc = {}
         if header is None:
             self.header = {'User-agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.1.5) '
                                          'Gecko/20091102 Firefox/3.5.5'}
@@ -87,12 +95,23 @@ class Scrapper(object):
         toc = """<html><html><body><h1>Table of Contents</h1>
         <p style="text-indent:0pt">"""
         chapter_html = '<a href="{0}.html">Chapter {0}</a><br/>'
-        for chapter_number in self.toc:
+        for chapter_number in self.toc.keys():
             toc += chapter_html.format(chapter_number)
         toc += '</p></body></html>'
         with open(os.path.join(self.title, self.title + '-toc.html'), 'w+') as f:
             f.write(toc)
         return toc
+
+    def find_toc(self):
+        """
+        Locate, from the start URL, and return URL of table of contents
+        :return:
+        """
+        soup = BeautifulSoup(self.visit_url(self.start_url), 'html.parser')
+        for link in soup.find_all('a'):
+            if 'table of contents' in link.text.lower():
+                return link.get('href')
+        raise TableOfContentsError('Table of contents not found, please specify it.')
 
     def chapters_walk(self):
         """
@@ -102,9 +121,15 @@ class Scrapper(object):
         if self.start_chapter_number > self.end_chapter_number:
             return
 
-        self.toc.append(self.start_chapter_number)
+        self.toc[self.start_chapter_number] = self.url
 
-        print 'Fetching chapter ' + str(self.start_chapter_number)
+        # Check if walk is hitting the same url
+        if self.url != self.start_url:
+            if self.url == self.toc[self.start_chapter_number]:
+                # Cycle detected
+                self.url = self.find_from_toc(self.start_chapter_number, self.find_toc())
+
+        print 'Fetching chapter ' + str(self.start_chapter_number) + ' ' + self.url
 
         html = self.visit_url(self.url)
         chapter = self.strip_chapter(html)
@@ -127,6 +152,30 @@ class Scrapper(object):
         self.url = self.find_from_toc(self.start_chapter_number, toc)
         return self.chapters_walk()
 
+    def generate_epub(self):
+        book = epub.EpubBook()
+        book.set_title(self.title)
+        chapters = []
+        if len(self.toc) < 1:
+            self.chapters_walk()
+        for chapter in self.toc.keys():
+            chapter = str(chapter)
+            with open(os.path.join(self.title, chapter + '.html')) as f:
+                content = f.read()
+            chapter = epub.EpubHtml(title='Chapter ' + chapter,
+                                    file_name=chapter + '.xhtml',
+                                    content=content)
+            book.add_item(chapter)
+            chapters.append(chapter)
+
+        book.add_item(epub.EpubNcx())
+        book.add_item(epub.EpubNav())
+        book.spine = ['nav']
+        for chapter in chapters:
+            book.spine.append(chapter)
+
+        epub.write_epub(os.path.join(self.title, self.title + '.epub'), book, {})
+
 
 if __name__ == '__main__':
     ls = Scrapper(title='Smartphone',
@@ -135,3 +184,4 @@ if __name__ == '__main__':
                   url='http://raisingthedead.ninja/2015/10/06/smartphone-chapter-31/')
     ls.chapters_walk()
     ls.make_html_toc()
+    ls.generate_epub()
