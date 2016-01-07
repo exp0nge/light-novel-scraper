@@ -3,18 +3,29 @@ import urllib2
 import sys
 import os
 
-reload(sys)
-sys.setdefaultencoding('utf-8')
-
 from readability.readability import Document
 from bs4 import BeautifulSoup
+
+reload(sys)
+sys.setdefaultencoding('utf-8')  # Needed fore websites that use Unicode
 
 
 class Scrapper(object):
     """
     Scrapper object which can walk through chapters and grab relevant content
     """
+
     def __init__(self, title, start_chapter_number, end_chapter_number, url, header=None):
+        """
+        Instantiates the scrapper with the relevant information like the start URL (url) and how far to walk for
+        all the chapters (end_chapter_number)
+        :param title: str
+        :param start_chapter_number: int
+        :param end_chapter_number: int
+        :param url: str
+        :param header: dict
+        :return:
+        """
         self.title = title
         self.start_chapter_number = int(start_chapter_number)
         self.end_chapter_number = int(end_chapter_number)
@@ -69,6 +80,10 @@ class Scrapper(object):
                 return link.get('href')
 
     def make_html_toc(self):
+        """
+        Generates a HTML table of contents (to use with Calibre)
+        :return: str
+        """
         toc = """<html><html><body><h1>Table of Contents</h1>
         <p style="text-indent:0pt">"""
         chapter_html = '<a href="{0}.html">Chapter {0}</a><br/>'
@@ -80,6 +95,10 @@ class Scrapper(object):
         return toc
 
     def chapters_walk(self):
+        """
+        Recursive method to walk from of URL to end
+        :return:
+        """
         if self.start_chapter_number > self.end_chapter_number:
             return
 

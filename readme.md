@@ -10,7 +10,12 @@ Readability to grab relevant text from a website.
 
 The following will grab all the chapters from 21 to 52:
 
-`chapters_walk(21, 52, 'start_url')`
+    ls = Scrapper(title='Smartphone',
+               start_chapter_number=31,
+               end_chapter_number=53,
+               url='http://raisingthedead.ninja/2015/10/06/smartphone-chapter-31/')          
+    ls.chapters_walk()  # Grab all the HTML files
+    ls.make_html_toc()  # Make a HTML table of contents file to use with calibre
 
 ## Requirements
 
