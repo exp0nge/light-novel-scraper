@@ -8,7 +8,7 @@ Readability to grab relevant text from a website.
 
 ## Usage
 
-The following will grab all the chapters from 21 to 52:
+The following will grab all the chapters from 31 to 53:
 
     ls = Scrapper(title='Smartphone',
                   start_chapter_number=31,

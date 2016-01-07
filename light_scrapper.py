@@ -153,6 +153,10 @@ class Scrapper(object):
         return self.chapters_walk()
 
     def generate_epub(self):
+        """
+        Generates a ePub with contents from the chapters_walk()
+        :return:
+        """
         book = epub.EpubBook()
         book.set_title(self.title)
         chapters = []
