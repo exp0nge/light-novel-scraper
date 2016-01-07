@@ -1,5 +1,7 @@
+# coding=utf-8
 import urllib2
 import sys
+import os
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -7,60 +9,110 @@ sys.setdefaultencoding('utf-8')
 from readability.readability import Document
 from bs4 import BeautifulSoup
 
-header = {'User-agent' : 'Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5'}
 
-def visit_url(url):
+class Scrapper(object):
     """
-    http://stackoverflow.com/questions/7933417/how-do-i-set-headers-using-pythons-urllib
+    Scrapper object which can walk through chapters and grab relevant content
     """
-    request = urllib2.Request(url, None, header)
-    return urllib2.urlopen(request).read()
+    def __init__(self, title, start_chapter_number, end_chapter_number, url, header=None):
+        self.title = title
+        self.start_chapter_number = int(start_chapter_number)
+        self.end_chapter_number = int(end_chapter_number)
+        self.start_url = self.url = url
+        self.main_content_div = 'entry-content'
+        self.toc = []
+        if header is None:
+            self.header = {'User-agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.1.5) '
+                                         'Gecko/20091102 Firefox/3.5.5'}
+        else:
+            self.header = header
+        if not os.path.exists(self.title):
+            os.makedirs(title)
 
-def strip_chapter(html):
-    doc = Document(html)
-    if len(doc.summary()) <= 20:
-        print 'This page has errors, returning entry-content div raw HTML.'
-        content = str(BeautifulSoup(html, 'html.parser').find_all('div', class_='entry-content')[0])
-        content = '<html><head><meta charset="utf-8"></head>' + content + '</html>'
-        return doc.short_title(), content
+    def visit_url(self, url):
+        """
+        http://stackoverflow.com/questions/7933417/how-do-i-set-headers-using-pythons-urllib
+        :param url: URL to visit
+        :return: str
+        """
+        request = urllib2.Request(url=url, headers=self.header)
+        return urllib2.urlopen(request).read()
 
-    return (doc.short_title(),
-           str(doc.summary()).replace('<html>', '<html><head><meta charset="utf-8"></head>'))
+    def strip_chapter(self, html):
+        """
+        Strips chapter and gets relevant HTML using Readability
+        :param html: str
+        :return:
+        """
+        doc = Document(html)
+        if len(doc.summary()) <= 20:
+            print 'This page has errors, returning entry-content div raw HTML.'
+            content = str(BeautifulSoup(html, 'html.parser').find_all('div', class_=self.main_content_div)[0])
+            content = '<html><head><meta charset="utf-8"></head>' + content + '</html>'
+            return doc.short_title(), content
 
-def find_from_toc(chapter_number, url):
-    chapter_number = str(chapter_number)
-    soup = BeautifulSoup(visit_url(url), 'html.parser')
-    chapter = 'chapter ' + chapter_number
-    for link in soup.find_all('a'):
-        if chapter in link.text.lower():
-            return link.get('href')
+        return (doc.short_title(),
+                str(doc.summary()).replace('<html>', '<html><head><meta charset="utf-8"></head>'))
 
-def chapters_walk(start_chapter_number, end_chapter_number, url):
-    start_chapter_number = int(start_chapter_number)
-    end_chapter_number = int(end_chapter_number)
-    if start_chapter_number > end_chapter_number:
-        print  'finished'
-        return
+    def find_from_toc(self, chapter_number, url):
+        """
+        Grabs link from table of contents provided the chapter number and TOC URL
+        :param chapter_number: int
+        :param url: str
+        :return:
+        """
+        chapter_number = str(chapter_number)
+        soup = BeautifulSoup(self.visit_url(url), 'html.parser')
+        chapter = 'chapter ' + chapter_number
+        for link in soup.find_all('a'):
+            if chapter in link.text.lower():
+                return link.get('href')
 
-    print 'Fetching chapter ' + str(start_chapter_number)
+    def make_html_toc(self):
+        toc = """<html><html><body><h1>Table of Contents</h1>
+        <p style="text-indent:0pt">"""
+        chapter_html = '<a href="{0}.html">Chapter {0}</a><br/>'
+        for chapter_number in self.toc:
+            toc += chapter_html.format(chapter_number)
+        toc += '</p></body></html>'
+        with open(os.path.join(self.title, self.title + '-toc.html'), 'w+') as f:
+            f.write(toc)
+        return toc
 
-    html = visit_url(url)
-    chapter = strip_chapter(html)
-    with open(str(start_chapter_number) + '.html', 'w+') as f:
-        f.write(chapter[1])
+    def chapters_walk(self):
+        if self.start_chapter_number > self.end_chapter_number:
+            return
 
-    # Start walking
-    soup = BeautifulSoup(html, 'html.parser')
+        self.toc.append(self.start_chapter_number)
 
-    toc = ''
-    # Find next chapter
-    for link in soup.find_all('a'):
-        if 'next chapter' in link.text.lower():
-            return chapters_walk(start_chapter_number + 1, end_chapter_number, link.get('href'))
-        if 'table of contents' in link.text.lower():
-            toc = link.get('href')
+        print 'Fetching chapter ' + str(self.start_chapter_number)
 
-    return chapters_walk(start_chapter_number + 1, end_chapter_number, find_from_toc(start_chapter_number + 1, toc))
+        html = self.visit_url(self.url)
+        chapter = self.strip_chapter(html)
+        with open(os.path.join(self.title, str(self.start_chapter_number) + '.html'), 'w+') as f:
+            f.write(chapter[1])
+
+        # Start walking
+        soup = BeautifulSoup(html, 'html.parser')
+
+        toc = ''
+        # Find next chapter
+        for link in soup.find_all('a'):
+            if 'next chapter' in link.text.lower():
+                self.start_chapter_number += 1
+                self.url = link.get('href')
+                return self.chapters_walk()
+            if 'table of contents' in link.text.lower():
+                toc = link.get('href')
+        self.start_chapter_number += 1
+        self.url = self.find_from_toc(self.start_chapter_number, toc)
+        return self.chapters_walk()
+
 
 if __name__ == '__main__':
-    chapters_walk(sys.argv[1], sys.argv[2], sys.argv[3])
+    ls = Scrapper(title='Smartphone',
+                  start_chapter_number=31,
+                  end_chapter_number=53,
+                  url='http://raisingthedead.ninja/2015/10/06/smartphone-chapter-31/')
+    ls.chapters_walk()
+    ls.make_html_toc()
