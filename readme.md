@@ -2,9 +2,9 @@
 
 ## About
 
-A scrapper tool to grab contents of chapters of a light novel and store them
-as HTML files to read later. The script utilizes
-Readability to grab relevant text from a website.
+A scrapper tool to grab contents of chapters of a light novel and store them as HTML files to read later. The script 
+utilizes `Readability`, with a fallback of grabbing the `content-div`, to grab relevant text from a website and 
+`ebooklib` to generate a ePub if necessary.
 
 ## Usage
 
@@ -26,3 +26,8 @@ Have the following installed with `pip`:
 1. [beautifulsoup4](http://www.crummy.com/software/BeautifulSoup/)
 1. [readability-lxml](https://github.com/buriy/python-readability)
 1. [ebooklib](https://github.com/aerkalov/ebooklib)
+
+## Not Supported
+
+- Saving images into ePub
+- TOC in ePub
