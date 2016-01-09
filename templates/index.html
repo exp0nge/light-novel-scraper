@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="lightScrapApp">
+  <head ng-controller="HeadController as headCtrl">
+    <meta charset="utf-8">
+    <title>//headCtrl.title//</title>
+  </head>
+  <body ng-controller="MainController as main">
+    //main.title//
+    <form action="/get/chapters/" method="post">
+        <label for="title">Title</label>
+        <input id="title" name="title" type="text">
+        <label for="start">Starting Chapter</label>
+        <input id="start" name="start" type="number" min="1">
+        <label for="end">Ending Chapter</label>
+        <input id="end" name="end" type="number" min="2">
+        <label for="url">Starting Chapter URL</label>
+        <input id="url" name="url" type="url">
+        <input type="submit">
+    </form>
+
+
+    <script src="static/angular.min.js"></script>
+    <script src="static/app.js" charset="utf-8"></script>
+  </body>
+</html>

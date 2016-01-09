@@ -18,7 +18,7 @@ class TableOfContentsError(Exception):
     pass
 
 
-class LightScrap(object):
+class LightScrapAPI(object):
     """
     Scrapper object which can walk through chapters and grab relevant content
     """
@@ -40,6 +40,7 @@ class LightScrap(object):
         self.start_url = self.url = url
         self.main_content_div = 'entry-content'
         self.toc = {}
+        self.chapters_content = {'title': self.title, 'chapters': []}
         if header is None:
             self.header = {'User-agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.1.5) '
                                          'Gecko/20091102 Firefox/3.5.5'}
@@ -98,8 +99,6 @@ class LightScrap(object):
         for chapter_number in self.toc.keys():
             toc += chapter_html.format(chapter_number)
         toc += '</p></body></html>'
-        with open(os.path.join(self.title, self.title + '-toc.html'), 'w+') as f:
-            f.write(toc)
         return toc
 
     def find_toc(self):
@@ -113,7 +112,11 @@ class LightScrap(object):
                 return link.get('href')
         raise TableOfContentsError('Table of contents not found, please specify it.')
 
-    def chapters_walk(self):
+    def get_chapters_as_json(self):
+        self.__chapters_walk()
+        return self.chapters_content
+
+    def __chapters_walk(self):
         """
         Recursive method to walk from of URL to end
         :return:
@@ -133,8 +136,7 @@ class LightScrap(object):
 
         html = self.visit_url(self.url)
         chapter = self.strip_chapter(html)
-        with open(os.path.join(self.title, str(self.start_chapter_number) + '.html'), 'w+') as f:
-            f.write(chapter[1])
+        self.chapters_content['chapters'].append(chapter[1])
 
         # Start walking
         soup = BeautifulSoup(html, 'html.parser')
@@ -145,12 +147,12 @@ class LightScrap(object):
             if 'next chapter' in link.text.lower():
                 self.start_chapter_number += 1
                 self.url = link.get('href')
-                return self.chapters_walk()
+                return self.__chapters_walk()
             if 'table of contents' in link.text.lower():
                 toc = link.get('href')
         self.start_chapter_number += 1
         self.url = self.find_from_toc(self.start_chapter_number, toc)
-        return self.chapters_walk()
+        return self.__chapters_walk()
 
     def generate_epub(self):
         """
@@ -161,7 +163,7 @@ class LightScrap(object):
         book.set_title(self.title)
         chapters = []
         if len(self.toc) < 1:
-            self.chapters_walk()
+            self.__chapters_walk()
         for chapter in self.toc.keys():
             chapter = str(chapter)
             with open(os.path.join(self.title, chapter + '.html')) as f:
@@ -179,13 +181,3 @@ class LightScrap(object):
             book.spine.append(chapter)
 
         epub.write_epub(os.path.join(self.title, self.title + '.epub'), book, {})
-
-
-if __name__ == '__main__':
-    ls = LightScrap(title='Smartphone',
-                    start_chapter_number=31,
-                    end_chapter_number=53,
-                    url='http://raisingthedead.ninja/2015/10/06/smartphone-chapter-31/')
-    ls.chapters_walk()
-    ls.make_html_toc()
-    ls.generate_epub()
