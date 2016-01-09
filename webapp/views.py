@@ -28,7 +28,9 @@ def task():
 
 @app.route('/task/<task_id>')
 def task_info(task_id):
-    return json.dumps({'task': task_id, 'state': celery.AsyncResult(task_id).state})
+    return json.dumps({'task': task_id,
+                       'state': celery.AsyncResult(task_id).state,
+                       'info': (celery.AsyncResult(task_id)).info})
 
 
 @app.route('/task/<task_id>/chapters')

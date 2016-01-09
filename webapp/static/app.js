@@ -1,6 +1,6 @@
 var title = 'Light Novel Scrapper';
 
-var app = angular.module('lightScrapApp', [])
+var app = angular.module('lightScrapApp', []);
 
 // Custom interpolater
 app.config(function($interpolateProvider){
