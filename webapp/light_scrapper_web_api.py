@@ -6,6 +6,10 @@ import os
 from readability.readability import Document
 from bs4 import BeautifulSoup
 from ebooklib import epub
+import simplejson
+
+from webapp import db, celery
+from models import Chapter
 
 reload(sys)
 sys.setdefaultencoding('utf-8')  # Needed fore websites that use Unicode
@@ -38,16 +42,16 @@ class LightScrapAPI(object):
         self.start_chapter_number = int(start_chapter_number)
         self.end_chapter_number = int(end_chapter_number)
         self.start_url = self.url = url
+        self.chapter_model = Chapter
+        self.db = db
         self.main_content_div = 'entry-content'
         self.toc = {}
-        self.chapters_content = {'title': self.title, 'chapters': []}
+        self.id = None
         if header is None:
             self.header = {'User-agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.1.5) '
                                          'Gecko/20091102 Firefox/3.5.5'}
         else:
             self.header = header
-        if not os.path.exists(self.title):
-            os.makedirs(title)
 
     def visit_url(self, url):
         """
@@ -112,11 +116,8 @@ class LightScrapAPI(object):
                 return link.get('href')
         raise TableOfContentsError('Table of contents not found, please specify it.')
 
-    def get_chapters_as_json(self):
-        self.__chapters_walk()
-        return self.chapters_content
 
-    def __chapters_walk(self):
+    def chapters_walk(self):
         """
         Recursive method to walk from of URL to end
         :return:
@@ -136,9 +137,13 @@ class LightScrapAPI(object):
 
         html = self.visit_url(self.url)
         chapter = self.strip_chapter(html)
-        self.chapters_content['chapters'].append(chapter[1])
+        # save to database
+        chapter_db = self.chapter_model(content=simplejson.dumps(chapter[1], cls=simplejson.encoder.JSONEncoderForHTML))
 
-        # Start walking
+        self.db.session.add(chapter_db)
+        self.db.session.commit()
+
+        # Continue walking
         soup = BeautifulSoup(html, 'html.parser')
 
         toc = ''
@@ -147,12 +152,12 @@ class LightScrapAPI(object):
             if 'next chapter' in link.text.lower():
                 self.start_chapter_number += 1
                 self.url = link.get('href')
-                return self.__chapters_walk()
+                return self.chapters_walk()
             if 'table of contents' in link.text.lower():
                 toc = link.get('href')
         self.start_chapter_number += 1
         self.url = self.find_from_toc(self.start_chapter_number, toc)
-        return self.__chapters_walk()
+        return self.chapters_walk()
 
     def generate_epub(self):
         """
@@ -163,7 +168,7 @@ class LightScrapAPI(object):
         book.set_title(self.title)
         chapters = []
         if len(self.toc) < 1:
-            self.__chapters_walk()
+            self.chapters_walk()
         for chapter in self.toc.keys():
             chapter = str(chapter)
             with open(os.path.join(self.title, chapter + '.html')) as f:
@@ -181,3 +186,12 @@ class LightScrapAPI(object):
             book.spine.append(chapter)
 
         epub.write_epub(os.path.join(self.title, self.title + '.epub'), book, {})
+
+
+@celery.task()
+def chapters_walk_task(title, start, end, url):
+    light_task = LightScrapAPI(title=title,
+                               start_chapter_number=start,
+                               end_chapter_number=end,
+                               url=url)
+    light_task.chapters_walk()
