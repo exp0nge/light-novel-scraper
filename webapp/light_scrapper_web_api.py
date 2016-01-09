@@ -27,7 +27,7 @@ class LightScrapAPI(object):
     Scrapper object which can walk through chapters and grab relevant content
     """
 
-    def __init__(self, title, start_chapter_number, end_chapter_number, url, header=None):
+    def __init__(self, title, start_chapter_number, end_chapter_number, url, task_id, header=None):
         """
         Instantiates the scrapper with the relevant information like the start URL (url) and how far to walk for
         all the chapters (end_chapter_number)
@@ -46,7 +46,7 @@ class LightScrapAPI(object):
         self.db = db
         self.main_content_div = 'entry-content'
         self.toc = {}
-        self.id = None
+        self.id = task_id
         if header is None:
             self.header = {'User-agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.1.5) '
                                          'Gecko/20091102 Firefox/3.5.5'}
@@ -138,7 +138,10 @@ class LightScrapAPI(object):
         html = self.visit_url(self.url)
         chapter = self.strip_chapter(html)
         # save to database
-        chapter_db = self.chapter_model(content=simplejson.dumps(chapter[1], cls=simplejson.encoder.JSONEncoderForHTML))
+        chapter_db = self.chapter_model(task=self.id,
+                                        content=simplejson.dumps(chapter[1], cls=simplejson.encoder.JSONEncoderForHTML),
+                                        chapter_number=int(self.start_chapter_number),
+                                        url=self.url)
 
         self.db.session.add(chapter_db)
         self.db.session.commit()
@@ -188,10 +191,11 @@ class LightScrapAPI(object):
         epub.write_epub(os.path.join(self.title, self.title + '.epub'), book, {})
 
 
-@celery.task()
-def chapters_walk_task(title, start, end, url):
+@celery.task(bind=True)
+def chapters_walk_task(self, title, start, end, url):
     light_task = LightScrapAPI(title=title,
                                start_chapter_number=start,
                                end_chapter_number=end,
-                               url=url)
+                               url=url,
+                               task_id=self.request.id)
     light_task.chapters_walk()

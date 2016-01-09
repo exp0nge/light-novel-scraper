@@ -2,7 +2,8 @@
 import json
 import urllib2
 
-from webapp import app
+from webapp import app, celery
+from webapp.models import Chapter
 from flask import request, render_template
 from light_scrapper_web_api import chapters_walk_task
 
@@ -25,17 +26,14 @@ def task():
         return json.dumps({'error': 'invalid url'})
 
 
-@app.route('/task/<id>')
-def task_info(id):
-    task = Task.query.get(id)
-    return json.dumps({'id': id, 'task': {
-        'start': task.start,
-        'end': task.end,
-        'current': task.current
-    }})
+@app.route('/task/<task_id>')
+def task_info(task_id):
+    return json.dumps({'task': task_id, 'state': celery.AsyncResult(task_id).state})
 
 
-@app.route('/task/<id>/chapters')
-def chapter_info(id):
-    return json.dumps({'id': id, 'chapters': Chapter.filter.query(Chapter.task == id)})
-
+@app.route('/task/<task_id>/chapters')
+def chapter_info(task_id):
+    return json.dumps({'task': task_id, 'chapters': [{'chapter': chapter.chapter_number,
+                                                      'url': chapter.url,
+                                                      'content': chapter.content}
+                                                     for chapter in Chapter.query.filter(Chapter.task == task_id)]})
