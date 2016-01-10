@@ -8,3 +8,4 @@ readability-lxml==0.6.1
 beautifulsoup4==4.4.1
 ebooklib==0.15
 flask-sqlalchemy==2.1
+redis==2.10.5
