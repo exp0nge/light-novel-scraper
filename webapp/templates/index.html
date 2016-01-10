@@ -18,6 +18,12 @@
         <input type="submit">
     </form>
     <div>//main.results//</div>
+    <div ng-show="main.htmlReady">
+        <a href="//main.zipDownloadLink//">Download ZIP (HTML files)</a>
+        <button ng-click="main.submitePubRequest()">Download ePub</button>
+    </div>
+    <div>//main.epubResults//</div>
+
     <script src="static/angular.min.js"></script>
     <script src="static/app.js" charset="utf-8"></script>
   </body>

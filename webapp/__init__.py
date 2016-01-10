@@ -8,7 +8,7 @@ import os
 app = Flask(__name__)
 
 app.config['DEBUG'] = True
-app.config['EPUB_FOLDER'] = 'epubs'
+app.config['EPUB_FOLDER'] = os.path.abspath('epubs')
 
 if not os.path.isdir(app.config['EPUB_FOLDER']):
     os.makedirs(app.config['EPUB_FOLDER'])

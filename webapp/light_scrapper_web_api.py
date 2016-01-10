@@ -136,10 +136,15 @@ class LightScrapAPI(object):
                 # Cycle detected
                 self.url = self.find_from_toc(self.start_chapter_number, self.find_toc())
 
+        if self.url is None:
+            return
+
         print 'Fetching chapter ' + str(self.start_chapter_number) + ' ' + self.url
 
         html = self.visit_url(self.url)
         chapter = self.strip_chapter(html)
+        if len(chapter[1]) < 4000:
+            return
         # update celery on progress
         self.celery_task.update_state(state='PROGRESS',
                                       meta={'current_chapter:': self.start_chapter_number,
@@ -192,35 +197,34 @@ def chapters_walk_task(self, title, start, end, url):
 
 @celery.task()
 def generate_epub(task_id, epub_path):
-        """
+    """
         Generates a ePub with contents from the chapters_walk()
         :return:
-        """
-        toc_chapters = Chapter.query.filter(Chapter.task == task_id)
-        novel = NovelInfo.query.get(task_id)
-        toc = {}
-        for chapter in toc_chapters:
-            toc[chapter.chapter_number] = chapter.content
-        print toc
-        title = novel.title
-        book = epub.EpubBook()
-        book.set_title(title)
-        chapters = []
-        for chapter_number, content in toc.items():
-            chapter = epub.EpubHtml(title='Chapter ' + str(chapter_number),
-                                    file_name=str(chapter_number) + '.xhtml',
-                                    content=content)
-            book.add_item(chapter)
-            chapters.append(chapter)
+    """
+    toc_chapters = Chapter.query.filter(Chapter.task == task_id)
+    novel = NovelInfo.query.get(task_id)
+    toc = {}
+    for chapter in toc_chapters:
+        toc[chapter.chapter_number] = chapter.content
+    title = novel.title
+    book = epub.EpubBook()
+    book.set_title(title)
+    chapters = []
+    for chapter_number, content in toc.items():
+        chapter = epub.EpubHtml(title='Chapter ' + str(chapter_number),
+                                file_name=str(chapter_number) + '.xhtml',
+                                content=simplejson.loads(content))
+        book.add_item(chapter)
+        chapters.append(chapter)
 
-        book.add_item(epub.EpubNcx())
-        book.add_item(epub.EpubNav())
-        book.spine = ['nav']
-        for chapter in chapters:
-            book.spine.append(chapter)
+    book.add_item(epub.EpubNcx())
+    book.add_item(epub.EpubNav())
+    book.spine = ['nav']
+    for chapter in chapters:
+        book.spine.append(chapter)
 
-        epub.write_epub(os.path.join(epub_path, task_id + '.epub'), book, {})
-        return 'Success, chapters collected: ' + str(len(toc.keys()))
+    epub.write_epub(os.path.join(epub_path, task_id + '.epub'), book, {})
+    return 'Success, chapters collected: ' + str(len(toc.keys()))
 
 
 def generate_zip(task_id):
@@ -229,6 +233,7 @@ def generate_zip(task_id):
     :param task_id: str
     :return: binary
     """
+    # TODO: Add TOC
     chapters = Chapter.query.filter(Chapter.task == task_id)
     novel = NovelInfo.query.get(task_id)
     mem_file = io.BytesIO()

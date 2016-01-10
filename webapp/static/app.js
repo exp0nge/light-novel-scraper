@@ -29,13 +29,13 @@ app.factory('epubTasks', ['$http', function ($http) {
     'use strict';
     return {
         queue: function (taskId) {
-            return $http.post('/task/' + taskId + '/chapters/' + '/task/epub/', {});
+            return $http.post('/task/' + taskId + '/chapters/task/epub/', {});
         },
         status: function (taskId, epubTaskId) {
-            return $http.get('/task/' + taskId + '/chapters/' + '/task/epub/' + epubTaskId);
+            return $http.get('/task/' + taskId + '/chapters/task/epub/' + epubTaskId);
         },
-        download: function (taskId) {
-            return $http.get('/task/' + taskId + '/chapters/' + '/d/epub/');
+        download: function (taskId, title) {
+            window.location = '/task/' + taskId + '/chapters/d/epub/?title=' + title;
         }
     };
 }]);
@@ -48,11 +48,15 @@ app.controller('HeadController', function () {
 });
 
 
-app.controller('MainController', ['novelTasks', '$interval', function (novelTasks, $interval) {
+app.controller('MainController', ['$interval', 'novelTasks', 'epubTasks', function ($interval, novelTasks, epubTasks) {
     'use strict';
     var vm = this;
     vm.title = title;
     vm.results = null;
+    vm.htmlReady = false;
+    vm.zipDownloadLink = null;
+    vm.epub_results = null;
+    vm.taskId = null;
     vm.scrapForm = {
         'title': 'smartphone',
         'start': 31,
@@ -72,11 +76,14 @@ app.controller('MainController', ['novelTasks', '$interval', function (novelTask
                     vm.results = 'Checking status';
                     novelStatusChecker = $interval(function () {
                         console.log('checking');
-                        novelTasks.status(res.taskId)
+                        vm.taskId = res.taskId;
+                        novelTasks.status(vm.taskId)
                             .success(function (statusRes) {
                                 vm.results = statusRes;
                                 if (statusRes.state === 'SUCCESS') {
                                     $interval.cancel(novelStatusChecker);
+                                    vm.htmlReady = true;
+                                    vm.zipDownloadLink = '/task/' + vm.taskId + '/chapters/d/zip/';
                                 }
                             })
                             .error(function (statusErr) {
@@ -90,13 +97,32 @@ app.controller('MainController', ['novelTasks', '$interval', function (novelTask
                 console.log(err);
             });
     };
+    vm.submitePubRequest = function () {
+        epubTasks.queue(vm.taskId)
+            .success(function (res) {
+                var epubStatusChecker;
+                console.log(res);
+                vm.epub_results = res;
+                epubStatusChecker = $interval(function () {
+                    console.log('checking epub status');
+                    epubTasks.status(vm.taskId, res.epubTaskId)
+                        .success(function (statusRes) {
+                            vm.epubResults = statusRes;
+                            if (statusRes.state === 'SUCCESS') {
+                                $interval.cancel(epubStatusChecker);
+                                console.log('grabbing %s', vm.taskId);
+                                epubTasks.download(vm.taskId, vm.scrapForm.title);
+                            }
+                        })
+                        .error(function (err) {
+                            console.log(err);
+                        });
+                }, 1000);
+            })
+            .error(function (err) {
+                console.log(err);
+            });
+    };
 
-    novelTasks.status('8ee278fb-bbb0-4e7b-82b3-84a625ffbbdf')
-        .success(function (data) {
-            console.log(data);
-        })
-        .error(function (err) {
-            console.log(err);
-        });
 
 }]);

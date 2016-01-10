@@ -1,7 +1,7 @@
 # coding=utf-8
 import json
 import urllib2
-import io
+import os
 
 from webapp import app, celery
 from webapp.models import Chapter
@@ -50,15 +50,17 @@ def epub_task(task_id):
 
 @app.route('/task/<task_id>/chapters/task/epub/<epub_task_id>/')
 def epub_task_status(task_id, epub_task_id):
-    return json.dumps({'epubTaskId': epub_task_id, 'status': celery.AsyncResult(epub_task_id).state})
+    return json.dumps({'epubTaskId': epub_task_id, 'state': celery.AsyncResult(epub_task_id).state})
 
 
 @app.route('/task/<task_id>/chapters/d/epub/')
 def epub_download(task_id):
-    return send_from_directory(app.config['EPUB_FOLDER'], task_id + '.epub', as_attachment=True)
+    return send_file(os.path.join(app.config['EPUB_FOLDER'], task_id + '.epub'),
+                     as_attachment=True,
+                     attachment_filename=request.args.get('title') + '.epub')
 
 
 @app.route('/task/<task_id>/chapters/d/zip/')
 def zip_download(task_id):
     zip_file, title = generate_zip(task_id)
-    return send_file(zip_file, attachment_filename=title + '.zip', as_attachment=True)
+    return send_file(zip_file, attachment_filename=title + task_id + '.zip', as_attachment=True)
