@@ -5,6 +5,7 @@ import os
 import datetime
 import zipfile
 import io
+from collections import OrderedDict
 
 from readability.readability import Document
 from bs4 import BeautifulSoup
@@ -201,9 +202,9 @@ def generate_epub(task_id, epub_path):
         Generates a ePub with contents from the chapters_walk()
         :return:
     """
-    toc_chapters = Chapter.query.filter(Chapter.task == task_id)
+    toc_chapters = (Chapter.query.filter(Chapter.task == task_id)).order_by(Chapter.chapter_number)
     novel = NovelInfo.query.get(task_id)
-    toc = {}
+    toc = OrderedDict()
     for chapter in toc_chapters:
         toc[chapter.chapter_number] = chapter.content
     title = novel.title
