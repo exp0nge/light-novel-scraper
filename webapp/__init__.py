@@ -9,6 +9,10 @@ app = Flask(__name__)
 
 app.config['DEBUG'] = True
 app.config['EPUB_FOLDER'] = 'epubs'
+
+if not os.path.isdir(app.config['EPUB_FOLDER']):
+    os.makedirs(app.config['EPUB_FOLDER'])
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///webapp.db'
 app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379'
 app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379'

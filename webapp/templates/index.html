@@ -6,19 +6,18 @@
   </head>
   <body ng-controller="MainController as main">
     //main.title//
-    <form action="/task/" method="post">
+    <form ng-submit="main.submitScrapRequest()">
         <label for="title">Title</label>
-        <input id="title" name="title" type="text">
+        <input id="title" name="title" type="text" ng-model="main.scrapForm.title" required>
         <label for="start">Starting Chapter</label>
-        <input id="start" name="start" type="number" min="1">
+        <input id="start" name="start" type="number" min="1" ng-model="main.scrapForm.start" required>
         <label for="end">Ending Chapter</label>
-        <input id="end" name="end" type="number" min="2">
+        <input id="end" name="end" type="number" min="2" ng-model="main.scrapForm.end" required>
         <label for="url">Starting Chapter URL</label>
-        <input id="url" name="url" type="url">
+        <input id="url" name="url" type="url" ng-model="main.scrapForm.url" required>
         <input type="submit">
     </form>
-
-
+    <div>//main.results//</div>
     <script src="static/angular.min.js"></script>
     <script src="static/app.js" charset="utf-8"></script>
   </body>

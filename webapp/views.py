@@ -18,10 +18,10 @@ def index():
 def novel_task():
     try:
         # scrapper.chapters_walk.delay()
-        chap_task = chapters_walk_task.delay(title=request.form['title'],
-                                             start=request.form['start'],
-                                             end=request.form['end'],
-                                             url=request.form['url'])
+        chap_task = chapters_walk_task.delay(title=request.get_json(force=True)['title'],
+                                             start=request.get_json(force=True)['start'],
+                                             end=request.get_json(force=True)['end'],
+                                             url=request.get_json(force=True)['url'])
         return json.dumps({'taskId': str(chap_task), 'status': 'success'})
     except urllib2.URLError:
         return json.dumps({'message': 'invalid url', 'status': 'error'})
