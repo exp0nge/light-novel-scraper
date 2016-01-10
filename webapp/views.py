@@ -9,9 +9,19 @@ from flask import request, render_template, send_file, send_from_directory
 from light_scrapper_web_api import chapters_walk_task, generate_epub, generate_zip
 
 
+@celery.task()
+def ping():
+    return 'OK'
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
+
+
+@app.route('/ping')
+def celery_pinger():
+    return json.dumps(celery.control.inspect().stats())
 
 
 @app.route('/task/', methods=['POST'])

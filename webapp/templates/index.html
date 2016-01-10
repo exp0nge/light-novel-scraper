@@ -3,27 +3,60 @@
   <head ng-controller="HeadController as headCtrl">
     <meta charset="utf-8">
     <title>//headCtrl.title//</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous">
   </head>
   <body ng-controller="MainController as main">
-    //main.title//
-    <form ng-submit="main.submitScrapRequest()">
-        <label for="title">Title</label>
-        <input id="title" name="title" type="text" ng-model="main.scrapForm.title" required>
-        <label for="start">Starting Chapter</label>
-        <input id="start" name="start" type="number" min="1" ng-model="main.scrapForm.start" required>
-        <label for="end">Ending Chapter</label>
-        <input id="end" name="end" type="number" min="2" ng-model="main.scrapForm.end" required>
-        <label for="url">Starting Chapter URL</label>
-        <input id="url" name="url" type="url" ng-model="main.scrapForm.url" required>
-        <input type="submit">
-    </form>
-    <div>//main.results//</div>
-    <div ng-show="main.htmlReady">
-        <a href="//main.zipDownloadLink//">Download ZIP (HTML files)</a>
-        <button ng-click="main.submitePubRequest()">Download ePub</button>
-    </div>
-    <div>//main.epubResults//</div>
-
+    <nav class="navbar navbar-light bg-faded">
+        //main.title//
+        <div class="card-block">
+            <div class="card-content">
+                <div class="alert alert-danger" ng-hide="main.celeryStatus">
+                    Server Status: <strong>CELERY/REDIS Offline</strong>
+                </div>
+                <div class="alert alert-success" ng-show="main.celeryStatus">
+                  Server Status: <strong>Online</strong>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <main>
+      <div class="container">
+        <br>
+        <div class="card" ng-show="main.results">
+          <div class="card-block">
+            <div>//main.results//</div>
+            <div>//main.epubResults//</div>
+            <div ng-show="main.htmlReady">
+                <a class="btn btn-primary" href="//main.zipDownloadLink//">Download ZIP (HTML files)</a>
+                <button class="btn btn-primary" ng-click="main.submitePubRequest()">Download ePub</button>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+              <form ng-submit="main.submitScrapRequest()">
+                <fieldset class="form-group">
+                  <label for="title">Title</label>
+                  <input id="title" class="form-control" name="title" type="text" ng-model="main.scrapForm.title" required>
+                </fieldset>
+                <fieldset class="form-group">
+                  <label for="start">Starting Chapter</label>
+                  <input id="start" class="form-control" name="start" type="number" min="1" ng-model="main.scrapForm.start" required>
+                  <label for="end">Ending Chapter</label>
+                  <input id="end" class="form-control" name="end" type="number" min="2" ng-model="main.scrapForm.end" required>
+                </fieldset>
+                <fieldset class="form-group">
+                  <label for="url">Starting Chapter URL</label>
+                  <input id="url" class="form-control" name="url" type="url" ng-model="main.scrapForm.url" required>
+                </fieldset>
+                  <input class="btn btn-primary form-control" ng-hide="main.hideSubmit" id="submit" type="submit">
+              </form>
+            </div>
+        </div>
+      </div>
+    </main>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/js/bootstrap.min.js" integrity="sha384-vZ2WRJMwsjRMW/8U7i6PWi6AlO1L79snBrmgiDpgIWJ82z8eA5lenwvxbMV1PAh7" crossorigin="anonymous"></script>
     <script src="static/angular.min.js"></script>
     <script src="static/app.js" charset="utf-8"></script>
   </body>

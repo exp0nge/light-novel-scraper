@@ -48,7 +48,7 @@ app.controller('HeadController', function () {
 });
 
 
-app.controller('MainController', ['$interval', 'novelTasks', 'epubTasks', function ($interval, novelTasks, epubTasks) {
+app.controller('MainController', ['$interval', '$http', 'novelTasks', 'epubTasks', function ($interval, $http, novelTasks, epubTasks) {
     'use strict';
     var vm = this;
     vm.title = title;
@@ -57,13 +57,21 @@ app.controller('MainController', ['$interval', 'novelTasks', 'epubTasks', functi
     vm.zipDownloadLink = null;
     vm.epub_results = null;
     vm.taskId = null;
+    vm.celeryStatus = false;
     vm.scrapForm = {
         'title': 'smartphone',
         'start': 31,
         'end': 33,
         'url': 'http://raisingthedead.ninja/2015/10/06/smartphone-chapter-31/'
     };
+    $http.get('/ping')
+        .success(function (res) {
+            if (res != 'null'){
+              vm.celeryStatus = true;
+            }
+        });
     vm.submitScrapRequest = function () {
+        vm.hideSubmit = true;
         novelTasks.queue({
             'title': vm.scrapForm.title,
             'start': vm.scrapForm.start,
@@ -81,6 +89,7 @@ app.controller('MainController', ['$interval', 'novelTasks', 'epubTasks', functi
                             .success(function (statusRes) {
                                 vm.results = statusRes;
                                 if (statusRes.state === 'SUCCESS') {
+                                    vm.hideSubmit = false;
                                     $interval.cancel(novelStatusChecker);
                                     vm.htmlReady = true;
                                     vm.zipDownloadLink = '/task/' + vm.taskId + '/chapters/d/zip/';
