@@ -54,16 +54,19 @@ app.controller('MainController', ['$interval', '$http', 'novelTasks', 'epubTasks
     vm.title = title;
     vm.results = null;
     vm.htmlReady = false;
+    vm.epubReady = false;
     vm.zipDownloadLink = null;
     vm.epub_results = null;
     vm.taskId = null;
     vm.celeryStatus = false;
+    vm.progressBar = 0;
     vm.scrapForm = {
         'title': 'smartphone',
         'start': 31,
         'end': 33,
         'url': 'http://raisingthedead.ninja/2015/10/06/smartphone-chapter-31/'
     };
+    vm.current_chapter = vm.scrapForm.start;
     $http.get('/ping')
         .success(function (res) {
             if (res != 'null'){
@@ -82,6 +85,10 @@ app.controller('MainController', ['$interval', '$http', 'novelTasks', 'epubTasks
                 var novelStatusChecker;
                 if (res.status === 'success') {
                     vm.results = 'Checking status';
+                    var progressTotal = (parseInt(vm.scrapForm.end) - parseInt(vm.scrapForm.start)) + 1;
+                    var progressDiff = 0;
+                    var prevChapter = parseInt(vm.scrapForm.start) - 1;
+                    vm.progressBar = progressDiff / progressTotal;
                     novelStatusChecker = $interval(function () {
                         console.log('checking');
                         vm.taskId = res.taskId;
@@ -89,10 +96,24 @@ app.controller('MainController', ['$interval', '$http', 'novelTasks', 'epubTasks
                             .success(function (statusRes) {
                                 vm.results = statusRes;
                                 if (statusRes.state === 'SUCCESS') {
+                                    vm.progressBar = 100;
+                                    vm.current_chapter = vm.scrapForm.end;
                                     vm.hideSubmit = false;
                                     $interval.cancel(novelStatusChecker);
                                     vm.htmlReady = true;
                                     vm.zipDownloadLink = '/task/' + vm.taskId + '/chapters/d/zip/';
+                                }
+                                else if (statusRes.state === 'PROGRESS') {
+
+                                    vm.current_chapter = statusRes.info.current_chapter;
+                                    if (parseInt(vm.current_chapter) > prevChapter){
+                                        progressDiff++;
+                                        vm.progressBar = progressDiff / progressTotal * 100;
+                                        prevChapter++;
+                                        console.log(vm.progressBar);
+                                    }
+
+                                    console.log(vm.progressBar);
                                 }
                             })
                             .error(function (statusErr) {
@@ -109,6 +130,7 @@ app.controller('MainController', ['$interval', '$http', 'novelTasks', 'epubTasks
     vm.submitePubRequest = function () {
         epubTasks.queue(vm.taskId)
             .success(function (res) {
+                vm.epubReady = true;
                 var epubStatusChecker;
                 console.log(res);
                 vm.epub_results = res;
@@ -121,6 +143,7 @@ app.controller('MainController', ['$interval', '$http', 'novelTasks', 'epubTasks
                                 $interval.cancel(epubStatusChecker);
                                 console.log('grabbing %s', vm.taskId);
                                 epubTasks.download(vm.taskId, vm.scrapForm.title);
+                                vm.epubReady = false;
                             }
                         })
                         .error(function (err) {

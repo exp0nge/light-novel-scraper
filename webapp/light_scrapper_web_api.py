@@ -148,7 +148,7 @@ class LightScrapAPI(object):
             return
         # update celery on progress
         self.celery_task.update_state(state='PROGRESS',
-                                      meta={'current_chapter:': self.start_chapter_number,
+                                      meta={'current_chapter': self.start_chapter_number,
                                             'end_chapter': self.end_chapter_number})
         # save to database
         chapter_db = self.chapter_model(task=self.id,

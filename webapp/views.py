@@ -21,7 +21,10 @@ def index():
 
 @app.route('/ping')
 def celery_pinger():
-    return json.dumps(celery.control.inspect().stats())
+    try:
+        return json.dumps(celery.control.inspect().stats())
+    except AttributeError, e:
+        return json.dumps({'error': str(e)})
 
 
 @app.route('/task/', methods=['POST'])
