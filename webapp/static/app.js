@@ -52,11 +52,10 @@ app.controller('MainController', ['$interval', '$http', 'novelTasks', 'epubTasks
     'use strict';
     var vm = this;
     vm.title = title;
-    vm.results = null;
+    vm.verbose = null;
     vm.htmlReady = false;
     vm.epubReady = false;
     vm.zipDownloadLink = null;
-    vm.epub_results = null;
     vm.taskId = null;
     vm.celeryStatus = false;
     vm.progressBar = 0;
@@ -84,7 +83,7 @@ app.controller('MainController', ['$interval', '$http', 'novelTasks', 'epubTasks
             .success(function (res) {
                 var novelStatusChecker;
                 if (res.status === 'success') {
-                    vm.results = 'Checking status';
+                    vm.verbose = 'Checking...';
                     var progressTotal = (parseInt(vm.scrapForm.end) - parseInt(vm.scrapForm.start)) + 1;
                     var progressDiff = 0;
                     var prevChapter = parseInt(vm.scrapForm.start) - 1;
@@ -94,7 +93,7 @@ app.controller('MainController', ['$interval', '$http', 'novelTasks', 'epubTasks
                         vm.taskId = res.taskId;
                         novelTasks.status(vm.taskId)
                             .success(function (statusRes) {
-                                vm.results = statusRes;
+                                vm.verbose = statusRes.state;
                                 if (statusRes.state === 'SUCCESS') {
                                     vm.progressBar = 100;
                                     vm.current_chapter = vm.scrapForm.end;
@@ -133,7 +132,7 @@ app.controller('MainController', ['$interval', '$http', 'novelTasks', 'epubTasks
                 vm.epubReady = true;
                 var epubStatusChecker;
                 console.log(res);
-                vm.epub_results = res;
+                vm.verbose = res.state;
                 epubStatusChecker = $interval(function () {
                     console.log('checking epub status');
                     epubTasks.status(vm.taskId, res.epubTaskId)
@@ -144,6 +143,7 @@ app.controller('MainController', ['$interval', '$http', 'novelTasks', 'epubTasks
                                 console.log('grabbing %s', vm.taskId);
                                 epubTasks.download(vm.taskId, vm.scrapForm.title);
                                 vm.epubReady = false;
+                                vm.verbose = 'SUCCESS';
                             }
                         })
                         .error(function (err) {

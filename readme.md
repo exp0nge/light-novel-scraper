@@ -2,11 +2,16 @@
 
 ## About
 
-A scrapper tool to grab contents of chapters of a light novel and store them as HTML files to read later. The script 
-utilizes `Readability`, with a fallback of grabbing the `content-div`, to grab relevant text from a website and 
-`ebooklib` to generate a ePub if necessary.
+A scrapper tool to grab contents of chapters of a light novel and store them as
+HTML files to read later. The script utilizes `Readability`, with a fallback of
+grabbing the `content-div`, to grab relevant text from a website and  `ebooklib`
+to generate a ePub if necessary.
+
+**Web API** utilizes Celery (with Redis).
 
 ## Usage
+
+* Local API
 
 The following will grab all the chapters from 31 to 53:
 
@@ -16,16 +21,15 @@ The following will grab all the chapters from 31 to 53:
                     url='http://raisingthedead.ninja/2015/10/06/smartphone-chapter-31/')          
     ls.chapters_walk()  # Grab all the HTML files
     ls.make_html_toc()  # Make a HTML table of contents file to use with Calibre
-    
     ls.generate_epub()  # You can generate a ePub, also.
+
+* Web API
+
+GIF example:
 
 ## Requirements
 
-Have the following installed with `pip`:
-
-1. [beautifulsoup4](http://www.crummy.com/software/BeautifulSoup/)
-1. [readability-lxml](https://github.com/buriy/python-readability)
-1. [ebooklib](https://github.com/aerkalov/ebooklib)
+`requirements.txt` included.
 
 ## Not Supported
 
