@@ -3,10 +3,12 @@
 from celery import Celery
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+import os
 
 app = Flask(__name__)
 
 app.config['DEBUG'] = True
+app.config['EPUB_FOLDER'] = 'epubs'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///webapp.db'
 app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379'
 app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379'

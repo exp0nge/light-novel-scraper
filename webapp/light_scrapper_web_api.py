@@ -2,6 +2,7 @@
 import urllib2
 import sys
 import os
+import datetime
 
 from readability.readability import Document
 from bs4 import BeautifulSoup
@@ -9,7 +10,7 @@ from ebooklib import epub
 import simplejson
 
 from webapp import db, celery
-from models import Chapter
+from models import Chapter, NovelInfo
 
 reload(sys)
 sys.setdefaultencoding('utf-8')  # Needed fore websites that use Unicode
@@ -117,7 +118,6 @@ class LightScrapAPI(object):
                 return link.get('href')
         raise TableOfContentsError('Table of contents not found, please specify it.')
 
-
     def chapters_walk(self):
         """
         Recursive method to walk from of URL to end
@@ -167,22 +167,46 @@ class LightScrapAPI(object):
         self.url = self.find_from_toc(self.start_chapter_number, toc)
         return self.chapters_walk()
 
-    def generate_epub(self):
+
+@celery.task(bind=True)
+def chapters_walk_task(self, title, start, end, url):
+    novel = NovelInfo(task=self.request.id,
+                      start=start,
+                      end=end,
+                      title=title,
+                      start_url=url,
+                      request_time=datetime.datetime.now())
+
+    db.session.add(novel)
+    db.session.commit()
+    light_task = LightScrapAPI(title=title,
+                               start_chapter_number=start,
+                               end_chapter_number=end,
+                               url=url,
+                               task_id=self.request.id,
+                               celery_task=self)
+    light_task.chapters_walk()
+
+
+@celery.task()
+def generate_epub(task_id, epub_path):
         """
         Generates a ePub with contents from the chapters_walk()
         :return:
         """
+        toc_chapters = Chapter.query.filter(Chapter.task == task_id)
+        novel = NovelInfo.query.get(task_id)
+        toc = {}
+        for chapter in toc_chapters:
+            toc[chapter.chapter_number] = chapter.content
+        print toc
+        title = novel.title
         book = epub.EpubBook()
-        book.set_title(self.title)
+        book.set_title(title)
         chapters = []
-        if len(self.toc) < 1:
-            self.chapters_walk()
-        for chapter in self.toc.keys():
-            chapter = str(chapter)
-            with open(os.path.join(self.title, chapter + '.html')) as f:
-                content = f.read()
-            chapter = epub.EpubHtml(title='Chapter ' + chapter,
-                                    file_name=chapter + '.xhtml',
+        for chapter_number, content in toc.items():
+            chapter = epub.EpubHtml(title='Chapter ' + str(chapter_number),
+                                    file_name=str(chapter_number) + '.xhtml',
                                     content=content)
             book.add_item(chapter)
             chapters.append(chapter)
@@ -193,15 +217,5 @@ class LightScrapAPI(object):
         for chapter in chapters:
             book.spine.append(chapter)
 
-        epub.write_epub(os.path.join(self.title, self.title + '.epub'), book, {})
-
-
-@celery.task(bind=True)
-def chapters_walk_task(self, title, start, end, url):
-    light_task = LightScrapAPI(title=title,
-                               start_chapter_number=start,
-                               end_chapter_number=end,
-                               url=url,
-                               task_id=self.request.id,
-                               celery_task=self)
-    light_task.chapters_walk()
+        epub.write_epub(os.path.join(epub_path, task_id + '.epub'), book, {})
+        return 'Success, chapters collected: ' + str(len(toc.keys()))
