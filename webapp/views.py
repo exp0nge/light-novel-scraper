@@ -1,12 +1,12 @@
 # coding=utf-8
 import json
 import urllib2
-import os
+import io
 
 from webapp import app, celery
 from webapp.models import Chapter
-from flask import request, render_template, redirect, send_from_directory
-from light_scrapper_web_api import chapters_walk_task, generate_epub
+from flask import request, render_template, send_file, send_from_directory
+from light_scrapper_web_api import chapters_walk_task, generate_epub, generate_zip
 
 
 @app.route('/')
@@ -56,3 +56,9 @@ def epub_task_status(task_id, epub_task_id):
 @app.route('/task/<task_id>/chapters/d/epub/')
 def epub_download(task_id):
     return send_from_directory(app.config['EPUB_FOLDER'], task_id + '.epub', as_attachment=True)
+
+
+@app.route('/task/<task_id>/chapters/d/zip/')
+def zip_download(task_id):
+    zip_file, title = generate_zip(task_id)
+    return send_file(zip_file, attachment_filename=title + '.zip', as_attachment=True)

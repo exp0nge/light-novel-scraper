@@ -3,6 +3,8 @@ import urllib2
 import sys
 import os
 import datetime
+import zipfile
+import io
 
 from readability.readability import Document
 from bs4 import BeautifulSoup
@@ -219,3 +221,21 @@ def generate_epub(task_id, epub_path):
 
         epub.write_epub(os.path.join(epub_path, task_id + '.epub'), book, {})
         return 'Success, chapters collected: ' + str(len(toc.keys()))
+
+
+def generate_zip(task_id):
+    """
+    http://stackoverflow.com/questions/27337013/how-to-send-zip-files-in-the-python-flask-framework
+    :param task_id: str
+    :return: binary
+    """
+    chapters = Chapter.query.filter(Chapter.task == task_id)
+    novel = NovelInfo.query.get(task_id)
+    mem_file = io.BytesIO()
+    with zipfile.ZipFile(mem_file, 'w') as zip_f:
+        for chapter in chapters:
+            data = zipfile.ZipInfo(str(chapter.chapter_number) + '.html')
+            data.compress_type = zipfile.ZIP_DEFLATED
+            zip_f.writestr(data, simplejson.loads(chapter.content))
+    mem_file.seek(0)
+    return mem_file, novel.title
