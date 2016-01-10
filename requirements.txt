@@ -1,0 +1,10 @@
+Flask==0.9
+Jinja2==2.6
+Werkzeug==0.8.3
+gunicorn==0.17.2
+celery==3.1.19
+simplejson==3.8.0
+readability-lxml==0.6.1
+beautifulsoup4==4.4.1
+ebooklib==0.15
+flask-sqlalchemy==2.1
