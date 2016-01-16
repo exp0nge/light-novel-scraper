@@ -2,6 +2,8 @@
 import urllib2
 import sys
 import os
+import re
+from collections import OrderedDict
 
 from readability.readability import Document
 from bs4 import BeautifulSoup
@@ -39,7 +41,7 @@ class LightScrap(object):
         self.end_chapter_number = int(end_chapter_number)
         self.start_url = self.url = url
         self.main_content_div = 'entry-content'
-        self.toc = {}
+        self.toc = OrderedDict()
         if header is None:
             self.header = {'User-agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.1.5) '
                                          'Gecko/20091102 Firefox/3.5.5'}
@@ -180,12 +182,30 @@ class LightScrap(object):
 
         epub.write_epub(os.path.join(self.title, self.title + '.epub'), book, {})
 
+    def toc_walk(self, toc_url):
+        """
+        Grabs links from table of contents
+        :param toc_url: str
+        :return:
+        """
+        self.toc = OrderedDict()
+        watered_soup = BeautifulSoup(self.visit_url(toc_url), 'html.parser')
+        for i in range(self.start_chapter_number, self.end_chapter_number):
+            self.toc[i] = None
+        chapter_regex = re.compile(r'(c|C)hapter(\s|\S)(?P<chap_no>[0-9]*)')
+        for link in watered_soup.find_all('a'):
+            if 'chapter' in link.text.lower():
+                found = chapter_regex.match(str(link.text)).group('chap_no')
+                if found and int(found) in self.toc.keys():
+                    self.toc[int(found)] = link.get('href')
+
 
 if __name__ == '__main__':
     ls = LightScrap(title='Smartphone',
                     start_chapter_number=31,
                     end_chapter_number=53,
                     url='http://raisingthedead.ninja/2015/10/06/smartphone-chapter-31/')
-    ls.chapters_walk()
-    ls.make_html_toc()
-    ls.generate_epub()
+    # ls.toc_walk('http://raisingthedead.ninja/current-projects/in-a-different-world-with-a-smartphone/')
+    # ls.chapters_walk()
+    # ls.make_html_toc()
+    # ls.generate_epub()
