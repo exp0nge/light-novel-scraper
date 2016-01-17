@@ -6,6 +6,7 @@ import datetime
 import zipfile
 import io
 from collections import OrderedDict
+import re
 
 from readability.readability import Document
 from bs4 import BeautifulSoup
@@ -49,7 +50,7 @@ class LightScrapAPI(object):
         self.chapter_model = Chapter
         self.db = db
         self.main_content_div = 'entry-content'
-        self.toc = {}
+        self.toc = OrderedDict()
         self.id = task_id
         self.celery_task = celery_task
         if header is None:
@@ -175,9 +176,45 @@ class LightScrapAPI(object):
         self.url = self.find_from_toc(self.start_chapter_number, toc)
         return self.chapters_walk()
 
+    def toc_walk(self, toc_url):
+        """
+        Grabs links from table of contents
+        :param toc_url: str
+        :return:
+        """
+        self.toc = OrderedDict()
 
-@celery.task(bind=True)
-def chapters_walk_task(self, title, start, end, url):
+        # Find all the links
+        watered_soup = BeautifulSoup(self.visit_url(toc_url), 'html.parser')
+        for i in range(self.start_chapter_number, self.end_chapter_number + 1):
+            self.toc[i] = None
+        chapter_regex = re.compile(r'(c|C)hapter(\s|\S)(?P<chap_no>[0-9]*)')
+        for link in watered_soup.find_all('a'):
+            if 'chapter' in link.text.lower():
+                found = chapter_regex.match(link.text)
+                if found is not None:
+                    found = found.group('chap_no')
+                    if found and int(found) in self.toc.keys():
+                        self.toc[int(found)] = link.get('href')
+
+        for key, link in self.toc.items():
+            # update celery on progress
+            self.celery_task.update_state(state='PROGRESS',
+                                          meta={'current_chapter': key,
+                                                'end_chapter': self.end_chapter_number})
+
+            content = self.strip_chapter(self.visit_url(link))
+            chapter_db = self.chapter_model(task=self.id,
+                                            content=simplejson.dumps(content[1],
+                                                                     cls=simplejson.encoder.JSONEncoderForHTML),
+                                            chapter_number=key,
+                                            url=link)
+
+            self.db.session.add(chapter_db)
+            self.db.session.commit()
+
+
+def add_novel_info(self, title, start, end, url):
     novel = NovelInfo(task=self.request.id,
                       start=start,
                       end=end,
@@ -187,6 +224,11 @@ def chapters_walk_task(self, title, start, end, url):
 
     db.session.add(novel)
     db.session.commit()
+
+
+@celery.task(bind=True)
+def chapters_walk_task(self, title, start, end, url):
+    add_novel_info(self, title, start, end, url)
     light_task = LightScrapAPI(title=title,
                                start_chapter_number=start,
                                end_chapter_number=end,
@@ -194,6 +236,18 @@ def chapters_walk_task(self, title, start, end, url):
                                task_id=self.request.id,
                                celery_task=self)
     light_task.chapters_walk()
+
+
+@celery.task(bind=True)
+def toc_walk_task(self, title, start, end, url):
+    add_novel_info(self, title, start, end, url)
+    light_task = LightScrapAPI(title=title,
+                               start_chapter_number=start,
+                               end_chapter_number=end,
+                               url=url,
+                               task_id=self.request.id,
+                               celery_task=self)
+    light_task.toc_walk(url)
 
 
 @celery.task()

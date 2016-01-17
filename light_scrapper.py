@@ -190,7 +190,7 @@ class LightScrap(object):
         """
         self.toc = OrderedDict()
         watered_soup = BeautifulSoup(self.visit_url(toc_url), 'html.parser')
-        for i in range(self.start_chapter_number, self.end_chapter_number):
+        for i in range(self.start_chapter_number, self.end_chapter_number + 1):
             self.toc[i] = None
         chapter_regex = re.compile(r'(c|C)hapter(\s|\S)(?P<chap_no>[0-9]*)')
         for link in watered_soup.find_all('a'):

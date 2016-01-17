@@ -13,8 +13,17 @@ app.config(function ($interpolateProvider) {
 app.factory('novelTasks', ['$http', function ($http) {
     'use strict';
     return {
-        queue: function (novelInfo) {
-            return $http.post('/task/', JSON.stringify(novelInfo));
+        queue: function (novelInfo, toc_bool) {
+            if (toc_bool) {
+                return $http.post('/task/toc/', JSON.stringify({'title': novelInfo.title,
+                                                                'start': novelInfo.start,
+                                                                'end': novelInfo.end,
+                                                                'url': novelInfo.urlTOC }));
+            }
+            return $http.post('/task/', JSON.stringify({'title': novelInfo.title,
+                                                                'start': novelInfo.start,
+                                                                'end': novelInfo.end,
+                                                                'url': novelInfo.url }));
         },
         status: function (taskId) {
             return $http.get('/task/' + taskId);
@@ -63,7 +72,8 @@ app.controller('MainController', ['$interval', '$http', 'novelTasks', 'epubTasks
         'title': 'smartphone',
         'start': 31,
         'end': 33,
-        'url': 'http://raisingthedead.ninja/2015/10/06/smartphone-chapter-31/'
+        'url': 'http://raisingthedead.ninja/2015/10/06/smartphone-chapter-31/',
+        'urlTOC': 'http://raisingthedead.ninja/current-projects/in-a-different-world-with-a-smartphone/'
     };
     vm.current_chapter = vm.scrapForm.start;
     $http.get('/ping')
@@ -72,14 +82,9 @@ app.controller('MainController', ['$interval', '$http', 'novelTasks', 'epubTasks
               vm.celeryStatus = true;
             }
         });
-    vm.submitScrapRequest = function () {
+    vm.submitScrapRequest = function (toc_bool) {
         vm.hideSubmit = true;
-        novelTasks.queue({
-            'title': vm.scrapForm.title,
-            'start': vm.scrapForm.start,
-            'end': vm.scrapForm.end,
-            'url': vm.scrapForm.url
-        })
+        novelTasks.queue(vm.scrapForm, toc_bool)
             .success(function (res) {
                 var novelStatusChecker;
                 if (res.status === 'success') {
@@ -117,6 +122,9 @@ app.controller('MainController', ['$interval', '$http', 'novelTasks', 'epubTasks
                             })
                             .error(function (statusErr) {
                                 console.log(statusErr);
+                                vm.verbose = 'ERROR OCCURRED';
+                                vm.hideSubmit = false;
+                                $interval.cancel(novelStatusChecker);
                             });
                     }, 1000);
                 }
@@ -124,6 +132,7 @@ app.controller('MainController', ['$interval', '$http', 'novelTasks', 'epubTasks
             })
             .error(function (err) {
                 console.log(err);
+                vm.verbose = 'ERROR OCCURRED';
             });
     };
     vm.submitePubRequest = function () {
@@ -148,11 +157,15 @@ app.controller('MainController', ['$interval', '$http', 'novelTasks', 'epubTasks
                         })
                         .error(function (err) {
                             console.log(err);
+                            vm.verbose = 'ERROR OCCURRED';
+                            vm.hideSubmit = false;
+                            $interval.cancel(epubStatusChecker);
                         });
                 }, 1000);
             })
             .error(function (err) {
                 console.log(err);
+                vm.verbose = 'ERROR OCCURRED';
             });
     };
 

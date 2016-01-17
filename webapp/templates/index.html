@@ -47,7 +47,16 @@
         </div>
         <div class="row" ng-hide="main.hideSubmit">
             <div class="col-sm-6">
-              <form ng-submit="main.submitScrapRequest()">
+                <div class="jumbotron jumbotron-fluid">
+                  <div class="container">
+                    <p class="lead">Use the form below if you want the scrapper to start from the
+                        <strong>first chapter</strong> URL and
+                    click on "Next Chapter" to find the next chapter.</p> <span class="text-muted">This method will try
+                      to find the table of contents link in the first chapter URL link if the Next Chapter button is
+                      broken.</span>
+                  </div>
+                </div>
+              <form ng-submit="main.submitScrapRequest(false)">
                 <fieldset class="form-group">
                   <label for="title">Title</label>
                   <input id="title" class="form-control" name="title" type="text" ng-model="main.scrapForm.title" required>
@@ -63,6 +72,35 @@
                   <input id="url" class="form-control" name="url" type="url" ng-model="main.scrapForm.url" required>
                 </fieldset>
                   <input class="btn btn-primary form-control" ng-hide="main.hideSubmit" id="submit" type="submit">
+              </form>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="jumbotron jumbotron-fluid">
+                  <div class="container">
+                    <p class="lead">Use the form below if you want the scrapper to start from the
+                        <strong>table of contents</strong> and find all the chapter links from there.</p>
+                      <span class="text-muted">This method is great for when translators keep an up-to-date table of
+                          contents. Otherwise, use the first form. This form will allow the same output types
+                          as the first.</span>
+                  </div>
+                </div>
+              <form ng-submit="main.submitScrapRequest(true)">
+                <fieldset class="form-group">
+                  <label for="title">Title</label>
+                  <input id="toc-title" class="form-control" name="title" type="text" ng-model="main.scrapForm.title" required>
+                </fieldset>
+                <fieldset class="form-group">
+                  <label for="start">Starting Chapter</label>
+                  <input id="toc-start" class="form-control" name="start" type="number" min="1" ng-model="main.scrapForm.start" required>
+                  <label for="end">Ending Chapter</label>
+                  <input id="toc-end" class="form-control" name="end" type="number" min="2" ng-model="main.scrapForm.end" required>
+                </fieldset>
+                <fieldset class="form-group">
+                  <label for="url">Table of Contents URL</label>
+                  <input id="toc-url" class="form-control" name="url" type="url" ng-model="main.scrapForm.urlTOC" required>
+                </fieldset>
+                  <input class="btn btn-info form-control" ng-hide="main.hideSubmit" id="toc-submit" type="submit">
               </form>
             </div>
         </div>
