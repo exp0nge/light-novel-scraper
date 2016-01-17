@@ -7,7 +7,7 @@ HTML files to read later. The script utilizes `Readability`, with a fallback of
 grabbing the `content-div`, to grab relevant text from a website and  `ebooklib`
 to generate a ePub if necessary.
 
-**Web API** utilizes Celery (with Redis).
+**Web API** utilizes Celery (with Redis) with Flask backend and AngularJS frontend.
 
 ## Usage
 
@@ -26,6 +26,8 @@ The following will grab all the chapters from 31 to 53:
 * Web API
 
 GIF example:
+
+![Web api demo gif](https://raw.githubusercontent.com/exp0nge/light-novel-scrapper/master/webapp-demo.gif)
 
 ## Requirements
 
