@@ -31,7 +31,7 @@ Use ``foreman start`` to start the web server, Redis, and Celery.
 
 GIF example:
 
-![Web api demo gif](https://raw.githubusercontent.com/exp0nge/light-novel-scrapper/master/webapp-demo.gif)
+![Web api demo gif](https://raw.githubusercontent.com/exp0nge/light-novel-scrapper/master/webapp-demo.gif?v=2)
 
 ## Requirements
 
