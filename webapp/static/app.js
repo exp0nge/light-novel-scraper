@@ -84,6 +84,7 @@ app.controller('MainController', ['$interval', '$http', 'novelTasks', 'epubTasks
         });
     vm.submitScrapRequest = function (toc_bool) {
         vm.hideSubmit = true;
+        vm.htmlReady = false;
         novelTasks.queue(vm.scrapForm, toc_bool)
             .success(function (res) {
                 var novelStatusChecker;
