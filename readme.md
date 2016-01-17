@@ -20,10 +20,14 @@ The following will grab all the chapters from 31 to 53:
                     end_chapter_number=53,
                     url='http://raisingthedead.ninja/2015/10/06/smartphone-chapter-31/')          
     ls.chapters_walk()  # Grab all the HTML files
+    # Or grab the chapters from the table of contents URL
+    ls.toc_walk('http://raisingthedead.ninja/current-projects/in-a-different-world-with-a-smartphone/')
     ls.make_html_toc()  # Make a HTML table of contents file to use with Calibre
     ls.generate_epub()  # You can generate a ePub, also.
 
 * Web API
+
+Use ``foreman start`` to start the web server, Redis, and Celery.
 
 GIF example:
 

@@ -198,6 +198,9 @@ class LightScrap(object):
                 found = chapter_regex.match(str(link.text)).group('chap_no')
                 if found and int(found) in self.toc.keys():
                     self.toc[int(found)] = link.get('href')
+                    content = self.strip_chapter(self.visit_url(link))
+                    with open(os.path.join(self.title, found + '.html'), 'w+') as f:
+                            f.write(content[1])
 
 
 if __name__ == '__main__':
