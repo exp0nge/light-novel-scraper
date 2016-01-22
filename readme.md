@@ -1,5 +1,7 @@
 # light-novel-scrapper
 
+[![Launch on OpenShift](http://launch-shifter.rhcloud.com/button.svg)](http://lightnovelscrapper-exp0nge.rhcloud.com)
+
 ## About
 
 A scrapper tool to grab contents of chapters of a light novel and store them as
