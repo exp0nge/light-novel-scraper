@@ -1,10 +1,10 @@
-# light-novel-scrapper
+# light-novel-scraper
 
 [![Launch on OpenShift](http://launch-shifter.rhcloud.com/button.svg)](http://lightnovelscrapper-exp0nge.rhcloud.com)
 
 ## About
 
-A scrapper tool to grab contents of chapters of a light novel and store them as
+A scraper tool to grab contents of chapters of a light novel and store them as
 HTML files to read later. The script utilizes `Readability`, with a fallback of
 grabbing the `content-div`, to grab relevant text from a website and  `ebooklib`
 to generate a ePub if necessary.
@@ -33,7 +33,7 @@ Use ``foreman start`` to start the web server, Redis, and Celery.
 
 GIF example:
 
-![Web api demo gif](https://raw.githubusercontent.com/exp0nge/light-novel-scrapper/master/webapp-demo.gif?v=2)
+![Web api demo gif](https://raw.githubusercontent.com/exp0nge/light-novel-scraper/master/webapp-demo.gif?v=2)
 
 ## Requirements
 
