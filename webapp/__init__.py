@@ -9,8 +9,10 @@ app = Flask(__name__)
 app.config['DEBUG'] = True
 app.config['EPUB_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'epubs')
 
-if not os.path.isdir(app.config['EPUB_FOLDER']):
-    os.makedirs(app.config['EPUB_FOLDER'])
+if os.path.isdir(app.config['EPUB_FOLDER']):
+    os.removedirs(app.config['EPUB_FOLDER'])
+
+os.makedirs(app.config['EPUB_FOLDER'])
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///webapp.db'
 app.config['BROKER_TRANSPORT'] = "sqlakombu.transport.Transport"
