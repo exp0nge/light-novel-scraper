@@ -6,7 +6,7 @@ import os
 
 app = Flask(__name__)
 
-app.config['DEBUG'] = True
+app.config['DEBUG'] = False
 app.config['EPUB_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'epubs')
 
 if os.path.isdir(app.config['EPUB_FOLDER']):
