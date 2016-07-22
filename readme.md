@@ -1,6 +1,6 @@
 # light-novel-scraper
 
-[![Launch on OpenShift](http://launch-shifter.rhcloud.com/button.svg)](http://lightnovelscrapper-exp0nge.rhcloud.com)
+[DEMO](https://novel-scraper.azurewebsites.net)
 
 ## About
 
