@@ -3,7 +3,7 @@
 <head ng-controller="HeadController as headCtrl">
     <meta charset="utf-8">
     <title>//headCtrl.title//</title>
-    <link href="static/favicon.ico" rel="icon" type="image/x-icon" />
+    <link href="static/favicon.ico" rel="icon" type="image/x-icon"/>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css"
           integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous">
     <link rel="stylesheet" href="static/main.css">
@@ -39,13 +39,14 @@
                         <div ng-show="main.htmlReady">
                             <div class="row">
                                 <div class="col-md-6 col-md-offset-3">
-                                    <a class="btn btn-primary" href="//main.zipDownloadLink//">Download ZIP (HTML
+                                    <a class="btn btn-primary btn-block btn-info" href="//main.zipDownloadLink//">Download
+                                        ZIP (HTML
                                         files)</a>
-                                    <button class="btn btn-primary" ng-click="main.submitePubRequest()"
+                                    <button class="btn btn-primary btn-block" ng-click="main.submitePubRequest()"
                                             ng-hide="main.epubReady">Download ePub
                                     </button>
                                     <hr>
-                                    <div class="alert alert-warning" role="alert" ng-show="main.epubReady">
+                                    <div class="alert alert-warning btn-block" role="alert" ng-show="main.epubReady">
                                         Hold on, preparing that ePub for you...
                                     </div>
                                 </div>
@@ -61,9 +62,7 @@
                     <div class="container">
                         <p class="lead">Use the form below if you want the scrapper to start from the
                             <strong>first chapter</strong> URL and
-                            click on "Next Chapter" to find the next chapter.</p> <span class="text-muted">This method will try
-                      to find the table of contents link in the first chapter URL link if the Next Chapter button is
-                      broken.</span>
+                            click on "Next Chapter" to find the next chapter.</p>
                     </div>
                 </div>
                 <form ng-submit="main.submitScrapRequest(false)" class="card card-block">
@@ -85,7 +84,8 @@
                         <input id="url" class="form-control" name="url" type="url" ng-model="main.scrapForm.url"
                                required>
                     </fieldset>
-                    <input class="btn btn-primary form-control" ng-hide="main.hideSubmit" id="submit" type="submit">
+                    <input class="btn btn-primary form-control" ng-hide="main.hideSubmit" id="submit" type="submit"
+                           value="Get Chapters Starting with the First Chapter">
                 </form>
             </div>
 
@@ -94,8 +94,6 @@
                     <div class="container">
                         <p class="lead">Use the form below if you want the scrapper to start from the
                             <strong>table of contents</strong> and find all the chapter links from there.</p>
-                      <span class="text-muted">This method is great for when translators keep an up-to-date table of
-                          contents. Otherwise, use the first form. This form will allow the same output types: HTML and ePUB.</span>
                     </div>
                 </div>
                 <form ng-submit="main.submitScrapRequest(true)" class="card card-block">
@@ -117,7 +115,8 @@
                         <input id="toc-url" class="form-control" name="url" type="url" ng-model="main.scrapForm.urlTOC"
                                required>
                     </fieldset>
-                    <input class="btn btn-primary form-control" ng-hide="main.hideSubmit" id="toc-submit" type="submit">
+                    <input class="btn btn-primary form-control" ng-hide="main.hideSubmit" id="toc-submit" type="submit"
+                           value="Get Chapters with Table of Contents">
                 </form>
             </div>
         </div>
