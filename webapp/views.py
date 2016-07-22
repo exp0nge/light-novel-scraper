@@ -3,11 +3,11 @@ import json
 import urllib2
 import os
 
-from webapp import app, celery
+from webapp import app, celery, db
 from webapp.models import Chapter
 from flask import request, render_template, send_file, send_from_directory
 from light_scrapper_web_api import chapters_walk_task, toc_walk_task, generate_epub, generate_zip
-
+import traceback
 
 @celery.task()
 def ping():
@@ -25,12 +25,21 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/ping')
+@app.route('/ping/')
 def celery_pinger():
     try:
-        return json.dumps(celery.control.inspect().stats())
-    except AttributeError, e:
-        return json.dumps({'error': str(e)})
+        return json.dumps(str(celery))
+    except Exception as e:
+        return json.dumps({ 'error': str(e), 'repr': repr(e), 'trace': traceback.format_exc() })
+        
+
+@app.route('/init/')
+def init_db():
+    try:
+        db.create_all()
+        return json.dumps({'success': 'Init success'})
+    except Exception as e:
+        return json.dumps({'error': str(e), 'repr': repr(e)})
 
 
 @app.route('/task/', methods=['POST'])

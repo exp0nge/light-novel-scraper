@@ -76,7 +76,6 @@ class LightScrapAPI(object):
         """
         doc = Document(html)
         if len(doc.summary()) <= 20:
-            print 'This page has errors, returning entry-content div raw HTML.'
             content = str(BeautifulSoup(html, 'html.parser').find_all('div', class_=self.main_content_div)[0])
             content = '<html><head><meta charset="utf-8"></head>' + content + '</html>'
             return doc.short_title(), content
@@ -141,11 +140,9 @@ class LightScrapAPI(object):
         if self.url is None:
             return
 
-        print 'Fetching chapter ' + str(self.start_chapter_number) + ' ' + self.url
-
         html = self.visit_url(self.url)
         chapter = self.strip_chapter(html)
-        if len(chapter[1]) < 4000:
+        if len(chapter[1]) < 3000:
             return
         # update celery on progress
         self.celery_task.update_state(state='PROGRESS',
@@ -173,7 +170,6 @@ class LightScrapAPI(object):
             if 'table of contents' in link.text.lower():
                 toc = link.get('href')
         self.start_chapter_number += 1
-        self.url = self.find_from_toc(self.start_chapter_number, toc)
         return self.chapters_walk()
 
     def toc_walk(self, toc_url):
@@ -188,10 +184,10 @@ class LightScrapAPI(object):
         watered_soup = BeautifulSoup(self.visit_url(toc_url), 'html.parser')
         for i in range(self.start_chapter_number, self.end_chapter_number + 1):
             self.toc[i] = None
-        chapter_regex = re.compile(r'(c|C)hapter(\s|\S)(?P<chap_no>[0-9]*)')
+        chapter_regex = re.compile(r'[0-9]*(c|C)hapter(\s|\S)(?P<chap_no>[0-9]*)')
         for link in watered_soup.find_all('a'):
             if 'chapter' in link.text.lower():
-                found = chapter_regex.match(link.text)
+                found = chapter_regex.search(str(link.text))
                 if found is not None:
                     found = found.group('chap_no')
                     if found and int(found) in self.toc.keys():
@@ -202,7 +198,6 @@ class LightScrapAPI(object):
             self.celery_task.update_state(state='PROGRESS',
                                           meta={'current_chapter': key,
                                                 'end_chapter': self.end_chapter_number})
-
             content = self.strip_chapter(self.visit_url(link))
             chapter_db = self.chapter_model(task=self.id,
                                             content=simplejson.dumps(content[1],

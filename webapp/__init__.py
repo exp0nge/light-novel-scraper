@@ -1,5 +1,4 @@
 # coding=utf-8
-# coding=utf-8
 from celery import Celery
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -8,15 +7,16 @@ import os
 app = Flask(__name__)
 
 app.config['DEBUG'] = True
-app.config['EPUB_FOLDER'] = os.path.abspath('epubs')
+app.config['EPUB_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'epubs')
 
 if not os.path.isdir(app.config['EPUB_FOLDER']):
     os.makedirs(app.config['EPUB_FOLDER'])
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///webapp.db'
-app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379'
-app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379'
-
+app.config['BROKER_TRANSPORT'] = "sqlakombu.transport.Transport"
+app.config['BROKER_HOST'] = "sqlite:///celerydb.sqlite"
+app.config['CELERY_BROKER_URL'] = 'sqla+sqlite:///celerydb.sqlite'
+app.config['CELERY_RESULT_BACKEND'] = 'db+sqlite:///results.sqlite'
 
 db = SQLAlchemy(app)
 

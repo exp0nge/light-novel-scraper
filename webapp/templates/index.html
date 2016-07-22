@@ -4,11 +4,12 @@
     <meta charset="utf-8">
     <title>//headCtrl.title//</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous">
+    <link rel="stylesheet" href="static/main.css">
   </head>
   <body ng-controller="MainController as main">
     <nav class="navbar navbar-light bg-faded">
-        //main.title//
-        <div class="card-block">
+        <h1 class="text-xs-center">//main.title//</h1>
+        <!--<div class="card-block">
             <div class="card-content">
                 <div class="alert alert-danger" ng-hide="main.celeryStatus">
                     Server Status: <strong>CELERY/REDIS Offline</strong>
@@ -17,7 +18,7 @@
                   Server Status: <strong>Online</strong>
                 </div>
             </div>
-        </div>
+        </div>-->
     </nav>
     <main>
       <div class="container">
@@ -56,7 +57,7 @@
                       broken.</span>
                   </div>
                 </div>
-              <form ng-submit="main.submitScrapRequest(false)">
+              <form ng-submit="main.submitScrapRequest(false)" class="card card-block">
                 <fieldset class="form-group">
                   <label for="title">Title</label>
                   <input id="title" class="form-control" name="title" type="text" ng-model="main.scrapForm.title" required>
@@ -84,7 +85,7 @@
                           contents. Otherwise, use the first form. This form will allow the same output types: HTML and ePUB.</span>
                   </div>
                 </div>
-              <form ng-submit="main.submitScrapRequest(true)">
+              <form ng-submit="main.submitScrapRequest(true)" class="card card-block">
                 <fieldset class="form-group">
                   <label for="title">Title</label>
                   <input id="toc-title" class="form-control" name="title" type="text" ng-model="main.scrapForm.title" required>
@@ -99,11 +100,18 @@
                   <label for="url">Table of Contents URL</label>
                   <input id="toc-url" class="form-control" name="url" type="url" ng-model="main.scrapForm.urlTOC" required>
                 </fieldset>
-                  <input class="btn btn-info form-control" ng-hide="main.hideSubmit" id="toc-submit" type="submit">
+                  <input class="btn btn-primary form-control" ng-hide="main.hideSubmit" id="toc-submit" type="submit">
               </form>
             </div>
         </div>
       </div>
+
+    <footer class="footer">
+      <div class="container text-xs-center">
+        <p>A web novel scrapper created by <a href="https://exp0nge.github.io">exp0nge</a>. <a href="https://github.com/exp0nge/light-novel-scraper">GitHub Repo</a>.</p>
+      </div>
+    </footer>
+
     </main>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/js/bootstrap.min.js" integrity="sha384-vZ2WRJMwsjRMW/8U7i6PWi6AlO1L79snBrmgiDpgIWJ82z8eA5lenwvxbMV1PAh7" crossorigin="anonymous"></script>

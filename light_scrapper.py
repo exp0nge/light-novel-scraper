@@ -151,7 +151,6 @@ class LightScrap(object):
             if 'table of contents' in link.text.lower():
                 toc = link.get('href')
         self.start_chapter_number += 1
-        self.url = self.find_from_toc(self.start_chapter_number, toc)
         return self.chapters_walk()
 
     def generate_epub(self):
@@ -192,13 +191,15 @@ class LightScrap(object):
         watered_soup = BeautifulSoup(self.visit_url(toc_url), 'html.parser')
         for i in range(self.start_chapter_number, self.end_chapter_number + 1):
             self.toc[i] = None
-        chapter_regex = re.compile(r'(c|C)hapter(\s|\S)(?P<chap_no>[0-9]*)')
+        chapter_regex = re.compile(r'[0-9]*(c|C)hapter(\s|\S)(?P<chap_no>[0-9]*)')
         for link in watered_soup.find_all('a'):
             if 'chapter' in link.text.lower():
-                found = chapter_regex.match(str(link.text)).group('chap_no')
+                found = chapter_regex.search(str(link.text))
+                if found is not None:
+                    found = found.group('chap_no')
                 if found and int(found) in self.toc.keys():
                     self.toc[int(found)] = link.get('href')
-                    content = self.strip_chapter(self.visit_url(link))
+                    content = self.strip_chapter(self.visit_url(link.get('href')))
                     with open(os.path.join(self.title, found + '.html'), 'w+') as f:
                             f.write(content[1])
 
@@ -206,9 +207,9 @@ class LightScrap(object):
 if __name__ == '__main__':
     ls = LightScrap(title='Smartphone',
                     start_chapter_number=31,
-                    end_chapter_number=53,
+                    end_chapter_number=33,
                     url='http://raisingthedead.ninja/2015/10/06/smartphone-chapter-31/')
-    # ls.toc_walk('http://raisingthedead.ninja/current-projects/in-a-different-world-with-a-smartphone/')
-    # ls.chapters_walk()
+    #ls.toc_walk('http://raisingthedead.ninja/current-projects/in-a-different-world-with-a-smartphone/')
+    ls.chapters_walk()
     # ls.make_html_toc()
     # ls.generate_epub()
