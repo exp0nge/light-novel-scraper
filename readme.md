@@ -1,6 +1,6 @@
 # light-novel-scraper
 
-[DEMO](https://novel-scraper.azurewebsites.net)
+[LIVE DEMO](https://novel-scraper.azurewebsites.net)
 
 ## About
 
