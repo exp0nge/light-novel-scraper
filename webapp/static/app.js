@@ -1,6 +1,6 @@
 /*jshint strict: true*/
 
-var title = 'Light Novel Scrapper';
+var title = 'Web Novel Scrapper';
 
 var app = angular.module('lightScrapApp', []);
 

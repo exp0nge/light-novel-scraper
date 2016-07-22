@@ -1,121 +1,140 @@
 <!DOCTYPE html>
 <html lang="en" ng-app="lightScrapApp">
-  <head ng-controller="HeadController as headCtrl">
+<head ng-controller="HeadController as headCtrl">
     <meta charset="utf-8">
     <title>//headCtrl.title//</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css"
+          integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous">
     <link rel="stylesheet" href="static/main.css">
-  </head>
-  <body ng-controller="MainController as main">
-    <nav class="navbar navbar-light bg-faded">
-        <h1 class="text-xs-center">//main.title//</h1>
-        <!--<div class="card-block">
-            <div class="card-content">
-                <div class="alert alert-danger" ng-hide="main.celeryStatus">
-                    Server Status: <strong>CELERY/REDIS Offline</strong>
-                </div>
-                <div class="alert alert-success" ng-show="main.celeryStatus">
-                  Server Status: <strong>Online</strong>
-                </div>
+</head>
+<body ng-controller="MainController as main">
+<nav class="navbar navbar-light bg-faded">
+    <h1 class="text-xs-center">//main.title//</h1>
+    <!--<div class="card-block">
+        <div class="card-content">
+            <div class="alert alert-danger" ng-hide="main.celeryStatus">
+                Server Status: <strong>CELERY/REDIS Offline</strong>
             </div>
-        </div>-->
-    </nav>
-    <main>
-      <div class="container">
+            <div class="alert alert-success" ng-show="main.celeryStatus">
+              Server Status: <strong>Online</strong>
+            </div>
+        </div>
+    </div>-->
+</nav>
+<main>
+    <div class="container">
         <br>
         <div class="row">
-          <div class="col-sm-12">
-            <div class="card" ng-show="main.verbose">
-                <div class="card-block">
-                  <span class="label label-info">//main.progressBar//%</span><span class="label label-primary pull-xs-right">Chapter: //main.current_chapter//</span>
-                  <progress class="progress progress-info" value="//main.progressBar//" max="100">//main.progressBar//%</progress>
-                  <div>//main.verbose//</div>
-                  <div ng-show="main.htmlReady">
-                      <div class="row">
-                          <div class="col-md-6 col-md-offset-3">
-                            <a class="btn btn-primary" href="//main.zipDownloadLink//">Download ZIP (HTML files)</a>
-                            <button class="btn btn-primary" ng-click="main.submitePubRequest()" ng-hide="main.epubReady">Download ePub</button>
-                            <hr>
-                            <div class="alert alert-warning" role="alert" ng-show="main.epubReady">
-                                Hold on, preparing that ePub for you...
+            <div class="col-sm-12">
+                <div class="card" ng-show="main.verbose">
+                    <div class="card-block">
+                        <span class="label label-info">//main.progressBar//%</span><span
+                            class="label label-primary pull-xs-right">Chapter: //main.current_chapter//</span>
+                        <progress class="progress progress-info" value="//main.progressBar//" max="100">
+                            //main.progressBar//%
+                        </progress>
+                        <div>//main.verbose//</div>
+                        <div ng-show="main.htmlReady">
+                            <div class="row">
+                                <div class="col-md-6 col-md-offset-3">
+                                    <a class="btn btn-primary" href="//main.zipDownloadLink//">Download ZIP (HTML
+                                        files)</a>
+                                    <button class="btn btn-primary" ng-click="main.submitePubRequest()"
+                                            ng-hide="main.epubReady">Download ePub
+                                    </button>
+                                    <hr>
+                                    <div class="alert alert-warning" role="alert" ng-show="main.epubReady">
+                                        Hold on, preparing that ePub for you...
+                                    </div>
+                                </div>
                             </div>
-                          </div>
-                      </div>
-                  </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-          </div>
+            </div>
         </div>
         <div class="row" ng-hide="main.hideSubmit">
             <div class="col-sm-6">
                 <div class="jumbotron jumbotron-fluid">
-                  <div class="container">
-                    <p class="lead">Use the form below if you want the scrapper to start from the
-                        <strong>first chapter</strong> URL and
-                    click on "Next Chapter" to find the next chapter.</p> <span class="text-muted">This method will try
+                    <div class="container">
+                        <p class="lead">Use the form below if you want the scrapper to start from the
+                            <strong>first chapter</strong> URL and
+                            click on "Next Chapter" to find the next chapter.</p> <span class="text-muted">This method will try
                       to find the table of contents link in the first chapter URL link if the Next Chapter button is
                       broken.</span>
-                  </div>
+                    </div>
                 </div>
-              <form ng-submit="main.submitScrapRequest(false)" class="card card-block">
-                <fieldset class="form-group">
-                  <label for="title">Title</label>
-                  <input id="title" class="form-control" name="title" type="text" ng-model="main.scrapForm.title" required>
-                </fieldset>
-                <fieldset class="form-group">
-                  <label for="start">Starting Chapter</label>
-                  <input id="start" class="form-control" name="start" type="number" min="1" ng-model="main.scrapForm.start" required>
-                  <label for="end">Ending Chapter</label>
-                  <input id="end" class="form-control" name="end" type="number" min="2" ng-model="main.scrapForm.end" required>
-                </fieldset>
-                <fieldset class="form-group">
-                  <label for="url">Starting Chapter URL</label>
-                  <input id="url" class="form-control" name="url" type="url" ng-model="main.scrapForm.url" required>
-                </fieldset>
-                  <input class="btn btn-primary form-control" ng-hide="main.hideSubmit" id="submit" type="submit">
-              </form>
+                <form ng-submit="main.submitScrapRequest(false)" class="card card-block">
+                    <fieldset class="form-group">
+                        <label for="title">Title</label>
+                        <input id="title" class="form-control" name="title" type="text" ng-model="main.scrapForm.title"
+                               required>
+                    </fieldset>
+                    <fieldset class="form-group">
+                        <label for="start">Starting Chapter</label>
+                        <input id="start" class="form-control" name="start" type="number" min="1"
+                               ng-model="main.scrapForm.start" required>
+                        <label for="end">Ending Chapter</label>
+                        <input id="end" class="form-control" name="end" type="number" min="2"
+                               ng-model="main.scrapForm.end" required>
+                    </fieldset>
+                    <fieldset class="form-group">
+                        <label for="url">Starting Chapter URL</label>
+                        <input id="url" class="form-control" name="url" type="url" ng-model="main.scrapForm.url"
+                               required>
+                    </fieldset>
+                    <input class="btn btn-primary form-control" ng-hide="main.hideSubmit" id="submit" type="submit">
+                </form>
             </div>
 
             <div class="col-sm-6">
                 <div class="jumbotron jumbotron-fluid">
-                  <div class="container">
-                    <p class="lead">Use the form below if you want the scrapper to start from the
-                        <strong>table of contents</strong> and find all the chapter links from there.</p>
+                    <div class="container">
+                        <p class="lead">Use the form below if you want the scrapper to start from the
+                            <strong>table of contents</strong> and find all the chapter links from there.</p>
                       <span class="text-muted">This method is great for when translators keep an up-to-date table of
                           contents. Otherwise, use the first form. This form will allow the same output types: HTML and ePUB.</span>
-                  </div>
+                    </div>
                 </div>
-              <form ng-submit="main.submitScrapRequest(true)" class="card card-block">
-                <fieldset class="form-group">
-                  <label for="title">Title</label>
-                  <input id="toc-title" class="form-control" name="title" type="text" ng-model="main.scrapForm.title" required>
-                </fieldset>
-                <fieldset class="form-group">
-                  <label for="start">Starting Chapter</label>
-                  <input id="toc-start" class="form-control" name="start" type="number" min="1" ng-model="main.scrapForm.start" required>
-                  <label for="end">Ending Chapter</label>
-                  <input id="toc-end" class="form-control" name="end" type="number" min="2" ng-model="main.scrapForm.end" required>
-                </fieldset>
-                <fieldset class="form-group">
-                  <label for="url">Table of Contents URL</label>
-                  <input id="toc-url" class="form-control" name="url" type="url" ng-model="main.scrapForm.urlTOC" required>
-                </fieldset>
-                  <input class="btn btn-primary form-control" ng-hide="main.hideSubmit" id="toc-submit" type="submit">
-              </form>
+                <form ng-submit="main.submitScrapRequest(true)" class="card card-block">
+                    <fieldset class="form-group">
+                        <label for="title">Title</label>
+                        <input id="toc-title" class="form-control" name="title" type="text"
+                               ng-model="main.scrapForm.title" required>
+                    </fieldset>
+                    <fieldset class="form-group">
+                        <label for="start">Starting Chapter</label>
+                        <input id="toc-start" class="form-control" name="start" type="number" min="1"
+                               ng-model="main.scrapForm.start" required>
+                        <label for="end">Ending Chapter</label>
+                        <input id="toc-end" class="form-control" name="end" type="number" min="2"
+                               ng-model="main.scrapForm.end" required>
+                    </fieldset>
+                    <fieldset class="form-group">
+                        <label for="url">Table of Contents URL</label>
+                        <input id="toc-url" class="form-control" name="url" type="url" ng-model="main.scrapForm.urlTOC"
+                               required>
+                    </fieldset>
+                    <input class="btn btn-primary form-control" ng-hide="main.hideSubmit" id="toc-submit" type="submit">
+                </form>
             </div>
         </div>
-      </div>
+    </div>
 
     <footer class="footer">
-      <div class="container text-xs-center">
-        <p>A web novel scrapper created by <a href="https://exp0nge.github.io">exp0nge</a>. <a href="https://github.com/exp0nge/light-novel-scraper">GitHub Repo</a>.</p>
-      </div>
+        <div class="container text-xs-center">
+            <p>A web novel scrapper created by <a href="https://exp0nge.github.io">exp0nge</a>. <a
+                    href="https://github.com/exp0nge/light-novel-scraper">GitHub Repo</a>.</p>
+        </div>
     </footer>
 
-    </main>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/js/bootstrap.min.js" integrity="sha384-vZ2WRJMwsjRMW/8U7i6PWi6AlO1L79snBrmgiDpgIWJ82z8eA5lenwvxbMV1PAh7" crossorigin="anonymous"></script>
-    <script src="static/angular.min.js"></script>
-    <script src="static/app.js" charset="utf-8"></script>
-  </body>
+</main>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/js/bootstrap.min.js"
+        integrity="sha384-vZ2WRJMwsjRMW/8U7i6PWi6AlO1L79snBrmgiDpgIWJ82z8eA5lenwvxbMV1PAh7"
+        crossorigin="anonymous"></script>
+<script src="static/angular.min.js"></script>
+<script src="static/app.js" charset="utf-8"></script>
+
+</body>
 </html>
