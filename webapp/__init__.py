@@ -3,6 +3,7 @@ from celery import Celery
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 import os
+import shutil
 
 app = Flask(__name__)
 
@@ -10,7 +11,7 @@ app.config['DEBUG'] = False
 app.config['EPUB_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'epubs')
 
 if os.path.isdir(app.config['EPUB_FOLDER']):
-    os.removedirs(app.config['EPUB_FOLDER'])
+    shutil.rmtree(app.config['EPUB_FOLDER'])
 
 os.makedirs(app.config['EPUB_FOLDER'])
 

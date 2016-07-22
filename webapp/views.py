@@ -9,6 +9,7 @@ from flask import request, render_template, send_file, send_from_directory
 from light_scrapper_web_api import chapters_walk_task, toc_walk_task, generate_epub, generate_zip
 import traceback
 
+
 @celery.task()
 def ping():
     return 'OK'
@@ -30,8 +31,8 @@ def celery_pinger():
     try:
         return json.dumps(str(celery))
     except Exception as e:
-        return json.dumps({ 'error': str(e), 'repr': repr(e), 'trace': traceback.format_exc() })
-        
+        return json.dumps({'error': str(e), 'repr': repr(e), 'trace': traceback.format_exc()})
+
 
 @app.route('/init/')
 def init_db():
