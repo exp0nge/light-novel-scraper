@@ -131,12 +131,6 @@ class LightScrapAPI(object):
 
         self.toc[self.start_chapter_number] = self.url
 
-        # Check if walk is hitting the same url
-        if self.url != self.start_url:
-            if self.url == self.toc[self.start_chapter_number]:
-                # Cycle detected
-                self.url = self.find_from_toc(self.start_chapter_number, self.find_toc())
-
         if self.url is None:
             return
 
