@@ -191,7 +191,7 @@ class LightScrap(object):
         watered_soup = BeautifulSoup(self.visit_url(toc_url), 'html.parser')
         for i in range(self.start_chapter_number, self.end_chapter_number + 1):
             self.toc[i] = None
-        chapter_regex = re.compile(r'[0-9]*(c|C)hapter(\s|\S)(?P<chap_no>[0-9]*)')
+        chapter_regex = re.compile(r'[0-9]*(c|C)hapter(\s|\S):(?P<chap_no>[0-9]*)')
         for link in watered_soup.find_all('a'):
             if 'chapter' in link.text.lower():
                 found = chapter_regex.search(str(link.text))
@@ -205,11 +205,11 @@ class LightScrap(object):
 
 
 if __name__ == '__main__':
-    ls = LightScrap(title='Smartphone',
-                    start_chapter_number=31,
-                    end_chapter_number=33,
-                    url='http://raisingthedead.ninja/2015/10/06/smartphone-chapter-31/')
-    #ls.toc_walk('http://raisingthedead.ninja/current-projects/in-a-different-world-with-a-smartphone/')
-    ls.chapters_walk()
+    ls = LightScrap(title='Arcane Emperor',
+                    start_chapter_number=1,
+                    end_chapter_number=68,
+                    url='https://royalroadl.com/fiction/chapter/94620')
+    ls.toc_walk('https://royalroadl.com/fiction/8463')
+    #ls.chapters_walk()
     # ls.make_html_toc()
-    # ls.generate_epub()
+    ls.generate_epub()

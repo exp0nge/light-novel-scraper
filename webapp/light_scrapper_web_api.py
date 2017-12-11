@@ -7,6 +7,7 @@ import zipfile
 import io
 from collections import OrderedDict
 import re
+from tld import get_tld
 
 from readability.readability import Document
 from bs4 import BeautifulSoup
@@ -19,6 +20,10 @@ from models import Chapter, NovelInfo
 reload(sys)
 sys.setdefaultencoding('utf-8')  # Needed fore websites that use Unicode
 
+
+import httplib  # or http.client if you're on Python 3
+
+httplib._MAXHEADERS = 1000
 
 class TableOfContentsError(Exception):
     """
@@ -47,6 +52,7 @@ class LightScrapAPI(object):
         self.start_chapter_number = int(start_chapter_number)
         self.end_chapter_number = int(end_chapter_number)
         self.start_url = self.url = url
+        self.domain = get_tld(self.start_url)
         self.chapter_model = Chapter
         self.db = db
         self.main_content_div = 'entry-content'
@@ -65,6 +71,8 @@ class LightScrapAPI(object):
         :param url: URL to visit
         :return: str
         """
+        if self.domain not in url:
+            url = 'http://' + self.domain + url
         request = urllib2.Request(url=url, headers=self.header)
         return urllib2.urlopen(request).read()
 

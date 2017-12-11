@@ -7,8 +7,11 @@ import shutil
 
 app = Flask(__name__)
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
 app.config['DEBUG'] = False
-app.config['EPUB_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'epubs')
+app.config['EPUB_FOLDER'] = os.path.join(BASE_DIR, 'epubs')
 
 if os.path.isdir(app.config['EPUB_FOLDER']):
     shutil.rmtree(app.config['EPUB_FOLDER'])
@@ -45,3 +48,8 @@ def make_celery(app):
 celery = make_celery(app)
 
 import webapp.views
+
+
+
+if __name__ == '__main__':
+    app.run()

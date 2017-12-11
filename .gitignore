@@ -9,6 +9,9 @@ __pycache__/
 
 venv
 
+webapp/epubs/*
+*.sqlite
+
 # Distribution / packaging
 .Python
 env/
