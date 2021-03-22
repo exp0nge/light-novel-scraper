@@ -16,7 +16,7 @@ gunicorn==0.17.2
 itsdangerous==0.24
 kombu==3.0.35
 kombu-sqlalchemy==1.1.0
-lxml==4.6.2
+lxml==4.6.3
 pytz==2015.7
 readability-lxml==0.6.1
 redis==2.10.5
