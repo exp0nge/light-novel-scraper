@@ -9,7 +9,7 @@ amqp==1.4.9
 anyjson==0.3.3
 beautifulsoup4==4.4.1
 billiard==3.3.0.22
-celery==3.1.19
+celery==5.2.2
 chardet==2.3.0
 cssselect==0.9.1
 gunicorn==0.17.2
